@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import { TextInput } from "react-native-paper";
 
 const QuenMK = ({ navigation }) => {
     const [email, setEmail] = useState('');
@@ -51,13 +52,16 @@ const QuenMK = ({ navigation }) => {
                 </Text>
 
                 <TextInput
-                    style={styles.input}
                     placeholder="example@email.com"
                     value={email}
                     onChangeText={setEmail}
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    placeholderTextColor="#aaa"
+                    outlineColor="#e0e0e0"
+                    activeOutlineColor="#3f51b5"
+                    theme={{ roundness: 10 }}
+                    left={<TextInput.Icon icon="email" />}
+                    style={{ backgroundColor: '#D4C7B0', marginBottom: 10 }}
                 />
 
                 <TouchableOpacity style={styles.button} onPress={handlePasswordReset}>
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#ffe4e6', // hồng nhạt
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
+        padding: 25,
     },
     card: {
         backgroundColor: '#fff',
@@ -104,20 +108,13 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 10,
-        paddingVertical: 12,
-        paddingHorizontal: 15,
-        fontSize: 16,
-        marginBottom: 20,
-        color: '#000',
-    },
+
     button: {
+        alignSelf: 'center',
+        width: 150,
+        borderRadius: 12,
         backgroundColor: '#d6336c',
         paddingVertical: 14,
-        borderRadius: 10,
         alignItems: 'center',
         marginBottom: 12,
     },
@@ -127,9 +124,9 @@ const styles = StyleSheet.create({
         fontWeight: '600',
     },
     backText: {
-        color: '#d6336c',
+        color: 'blue',
         textAlign: 'center',
-        fontSize: 14,
+        fontSize: 16,
     },
 });
 

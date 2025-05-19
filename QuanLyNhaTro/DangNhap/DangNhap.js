@@ -3,7 +3,6 @@ import { Button, HelperText, TextInput } from "react-native-paper";
 import { dangNhap, useMyContextController } from "../TrungTam";
 import React, { useEffect } from "react";
 import firestore from "@react-native-firebase/firestore";
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const DangNhap = ({ navigation }) => {
@@ -96,64 +95,52 @@ const DangNhap = ({ navigation }) => {
                 {/* Logo hoặc biểu tượng app */}
                 <View style={styles.logoContainer}>
                     <Image
-                        source={{ uri: 'https://via.placeholder.com/150' }}
+                        source={require('../HinhAnh/logo.png')}
                         style={styles.logo}
                         resizeMode="contain"
                     />
                 </View>
 
                 {/* Tiêu đề trang */}
-                <Text style={styles.headerText}>Đăng nhập</Text>
+                <Text style={styles.headerText}>QUẢN LÝ NHÀ TRỌ</Text>
                 <Text style={styles.subHeaderText}>Chào mừng bạn quay trở lại!</Text>
 
                 {/* Form đăng nhập */}
                 <View style={styles.formContainer}>
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="email" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Địa chỉ email"
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#3f51b5"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                        />
-                    </View>
+                    <TextInput
+                        label="Địa chỉ email"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#3f51b5"
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="email" />}
+                        style={{ backgroundColor: 'white' }}
+                    />
+
                     <HelperText type="error" visible={hasErrorEmail()}>
                         {email.trim() === "" ? "Vui lòng nhập Email" : "Email không hợp lệ"}
                     </HelperText>
+                    <TextInput
+                        label="Mật khẩu"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={hiddenPassword}
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#3f51b5"
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="lock" />}
+                        right={
+                            <TextInput.Icon
+                                icon={hiddenPassword ? "eye" : "eye-off"}
+                                onPress={() => setHiddenPassword(!hiddenPassword)}
+                            />
+                        }
+                        style={{ backgroundColor: 'white' }}
+                    />
 
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="lock" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Mật khẩu"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={hiddenPassword}
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#3f51b5"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                            right={
-                                <TextInput.Icon
-                                    icon={hiddenPassword ? "eye" : "eye-off"}
-                                    onPress={() => setHiddenPassword(!hiddenPassword)}
-                                    color="#666"
-                                />
-                            }
-                        />
-                    </View>
                     <HelperText type="error" visible={hasErrorPassword()}>
                         Mật khẩu phải từ 6 ký tự trở lên
                     </HelperText>
@@ -220,78 +207,70 @@ const DangNhap = ({ navigation }) => {
     );
 
 };
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#D4C7B0',
     },
     scrollContainer: {
         flexGrow: 1,
         paddingHorizontal: 24,
-        paddingBottom: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
     },
     logoContainer: {
         alignItems: 'center',
-        marginTop: 40,
-        marginBottom: 20,
     },
     logo: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        backgroundColor: '#e0e0e0',
     },
     headerText: {
-        fontSize: 28,
+        fontSize: 30,
         fontWeight: 'bold',
-        color: '#333',
+        color: '#2c3e50',
         textAlign: 'center',
+        marginTop: 10,
     },
     subHeaderText: {
         fontSize: 16,
-        color: '#666',
-        marginBottom: 30,
-        textAlign: 'center',
-    },
-    formContainer: {
-        width: '100%',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: -5,
-    },
-    inputIconContainer: {
-        position: 'absolute',
-        left: 12,
-        zIndex: 1,
-        height: '100%',
-        justifyContent: 'center',
-        paddingTop: 15,
-    },
-    input: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    inputContent: {
-        paddingLeft: 35,
-    },
-    forgotPasswordContainer: {
-        alignSelf: 'flex-end',
-        marginTop: 5,
-        marginBottom: 20,
-    },
-    forgotPasswordText: {
-        color: '#3f51b5',
-        fontWeight: '600',
-    },
-    errorMessage: {
+        color: '#7f8c8d',
         textAlign: 'center',
         marginBottom: 10,
     },
+    formContainer: {
+        backgroundColor: '#ffffff',
+        borderRadius: 16,
+        padding: 10,
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+    },
+
+    forgotPasswordContainer: {
+        alignSelf: 'flex-end',
+        marginTop: 5,
+        marginBottom: 15,
+    },
+    forgotPasswordText: {
+        color: '#1A8FE3',
+        fontWeight: 'bold',
+    },
+    errorMessage: {
+        textAlign: 'center',
+        marginBottom: 5,
+    },
     loginButton: {
-        marginTop: 10,
-        borderRadius: 8,
-        elevation: 3,
+        backgroundColor: '#774936',
+        alignSelf: 'center',
+        width: 150,
+        borderRadius: 12,
+        elevation: 2,
     },
     loginButtonContent: {
         height: 52,
@@ -300,26 +279,25 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         letterSpacing: 0.5,
+        color: '#fff',
     },
     orContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 25,
+        marginVertical: 10,
     },
     divider: {
         flex: 1,
         height: 1,
-        backgroundColor: '#e0e0e0',
+        backgroundColor: '#dcdde1',
     },
     orText: {
-        color: '#888',
         paddingHorizontal: 10,
-        fontSize: 14,
+        fontSize: 16,
     },
     socialButtonsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginBottom: 30,
     },
     socialButton: {
         width: 50,
@@ -327,24 +305,24 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
-        marginHorizontal: 10,
+        marginHorizontal: 12,
         elevation: 3,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.2,
-        shadowRadius: 2,
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
     },
     registerContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 15,
+        marginTop: 10,
     },
     registerText: {
-        color: '#666',
+
         fontSize: 16,
     },
     registerLinkText: {
-        color: '#3f51b5',
+        color: '#1A8FE3',
         fontWeight: 'bold',
         fontSize: 16,
     },

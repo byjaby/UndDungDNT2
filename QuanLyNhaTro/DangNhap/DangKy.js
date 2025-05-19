@@ -67,14 +67,6 @@ const DangKy = ({ navigation }) => {
                 contentContainerStyle={styles.scrollContainer}
                 showsVerticalScrollIndicator={false}
             >
-                {/* Logo hoặc biểu tượng app */}
-                <View style={styles.logoContainer}>
-                    <Image
-                        source={{ uri: 'https://via.placeholder.com/150' }}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-                </View>
 
                 {/* Tiêu đề đăng ký */}
                 <Text style={styles.headerText}>Tạo tài khoản mới</Text>
@@ -83,146 +75,117 @@ const DangKy = ({ navigation }) => {
                 {/* Form đăng ký */}
                 <View style={styles.formContainer}>
                     {/* Họ và tên */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="person" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Họ và tên"
-                            value={fullName}
-                            onChangeText={setFullName}
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#e91e63"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                        />
-                    </View>
+                    <TextInput
+                        style={styles.input}
+                        label="Họ và tên"
+                        value={fullName}
+                        onChangeText={setFullName}
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="account" color="#666" />}
+                    />
                     <HelperText type="error" visible={submitted && !isFullNameValid()}>
                         Họ tên không được để trống
                     </HelperText>
 
                     {/* Email */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="email" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Địa chỉ email"
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#e91e63"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                        />
-                    </View>
+
+                    <TextInput
+                        style={styles.input}
+                        label="Địa chỉ email"
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="email" color="#666" />}
+                    />
                     <HelperText type="error" visible={submitted && !isEmailValid()}>
                         Email không hợp lệ
                     </HelperText>
 
                     {/* Mật khẩu */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="lock" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Mật khẩu"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry={hiddenPassword}
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#e91e63"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                            right={
-                                <TextInput.Icon
-                                    icon={hiddenPassword ? "eye" : "eye-off"}
-                                    onPress={() => setHiddenPassword(!hiddenPassword)}
-                                    color="#666"
-                                />
-                            }
-                        />
-                    </View>
+                    <TextInput
+                        style={styles.input}
+                        label="Mật khẩu"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={hiddenPassword}
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="lock" color="#666" />}
+                        right={
+                            <TextInput.Icon
+                                icon={hiddenPassword ? "eye" : "eye-off"}
+                                onPress={() => setHiddenPassword(!hiddenPassword)}
+                                color="#666"
+                            />
+                        }
+                    />
                     <HelperText type="error" visible={submitted && !isPasswordValid()}>
                         Mật khẩu phải có ít nhất 6 ký tự
                     </HelperText>
 
                     {/* Xác nhận mật khẩu */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="lock" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Nhập lại mật khẩu"
-                            value={passwordConfirm}
-                            onChangeText={setPasswordConfirm}
-                            secureTextEntry={hiddenPasswordConfirm}
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#e91e63"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                            right={
-                                <TextInput.Icon
-                                    icon={hiddenPasswordConfirm ? "eye" : "eye-off"}
-                                    onPress={() => setHiddenPasswordConfirm(!hiddenPasswordConfirm)}
-                                    color="#666"
-                                />
-                            }
-                        />
-                    </View>
+                    <TextInput
+                        style={styles.input}
+                        label="Nhập lại mật khẩu"
+                        value={passwordConfirm}
+                        onChangeText={setPasswordConfirm}
+                        secureTextEntry={hiddenPasswordConfirm}
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="lock" color="#666" />}
+                        right={
+                            <TextInput.Icon
+                                icon={hiddenPasswordConfirm ? "eye" : "eye-off"}
+                                onPress={() => setHiddenPasswordConfirm(!hiddenPasswordConfirm)}
+                                color="#666"
+                            />
+                        }
+                    />
                     <HelperText type="error" visible={submitted && !isPasswordConfirmValid()}>
                         Mật khẩu xác nhận không khớp
                     </HelperText>
 
                     {/* Số điện thoại */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="phone" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Số điện thoại"
-                            value={phone}
-                            onChangeText={setPhone}
-                            keyboardType="phone-pad"
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#e91e63"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                        />
-                    </View>
+                    <TextInput
+                        style={styles.input}
+                        label="Số điện thoại"
+                        value={phone}
+                        onChangeText={setPhone}
+                        keyboardType="phone-pad"
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="phone" color="#666" />}
+                    />
                     <HelperText type="error" visible={submitted && !isPhoneValid()}>
                         Số điện thoại phải gồm đúng 10 số
                     </HelperText>
 
                     {/* Địa chỉ */}
-                    <View style={styles.inputContainer}>
-                        <View style={styles.inputIconContainer}>
-                            <MaterialIcons name="home" size={20} color="#666" />
-                        </View>
-                        <TextInput
-                            style={styles.input}
-                            label="Địa chỉ"
-                            value={address}
-                            onChangeText={setAddress}
-                            mode="outlined"
-                            outlineColor="#e0e0e0"
-                            activeOutlineColor="#e91e63"
-                            contentStyle={styles.inputContent}
-                            theme={{ roundness: 10 }}
-                        />
-                    </View>
+                    <TextInput
+                        style={styles.input}
+                        label="Địa chỉ"
+                        value={address}
+                        onChangeText={setAddress}
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="home" color="#666" />}
+                    />
                     {loading ? (
                         <ActivityIndicator size="large" color="#e91e63" style={styles.loading} />
                     ) : (
@@ -235,7 +198,7 @@ const DangKy = ({ navigation }) => {
                             labelStyle={styles.buttonLabel}
                             android_ripple={{ color: 'rgba(255, 255, 255, 0.3)' }}
                         >
-                            Tạo tài khoản
+                            Đăng ký
                         </Button>
                     )}
 
@@ -254,24 +217,16 @@ const DangKy = ({ navigation }) => {
 
 const styles = StyleSheet.create({
     container: {
+        paddingTop: 30,
         flex: 1,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#D4C7B0',
     },
     scrollContainer: {
         flexGrow: 1,
         paddingHorizontal: 24,
         paddingBottom: 40,
     },
-    logoContainer: {
-        alignItems: 'center',
-        marginTop: 30,
-        marginBottom: 10,
-    },
-    logo: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-    },
+
     headerText: {
         fontSize: 28,
         fontWeight: 'bold',
@@ -287,33 +242,19 @@ const styles = StyleSheet.create({
     formContainer: {
         width: '100%',
     },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: -5,
-    },
-    inputIconContainer: {
-        position: 'absolute',
-        left: 12,
-        zIndex: 1,
-        height: '100%',
-        justifyContent: 'center',
-        paddingTop: 15,
-    },
     input: {
-        flex: 1,
-        backgroundColor: 'transparent',
-    },
-    inputContent: {
-        paddingLeft: 35,
+        backgroundColor: '#fff',
     },
     loading: {
         marginVertical: 20,
     },
     registerButton: {
+        alignSelf: 'center',
+        width: 150,
+        borderRadius: 12,
+
         marginTop: 20,
         marginBottom: 20,
-        borderRadius: 8,
         elevation: 3,
     },
     registerButtonContent: {
@@ -328,7 +269,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        marginTop: 10,
+
     },
     loginText: {
         color: '#666',
