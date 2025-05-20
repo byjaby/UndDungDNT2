@@ -1,4 +1,4 @@
-import { View, StatusBar, Text, TouchableOpacity, StyleSheet, Image, ScrollView } from "react-native";
+import { View, StatusBar, Text, TouchableOpacity, StyleSheet, Image, ScrollView, ActivityIndicator } from "react-native";
 import { Button, HelperText, TextInput } from "react-native-paper";
 import { dangNhap, useMyContextController } from "../TrungTam";
 import React, { useEffect } from "react";
@@ -7,12 +7,13 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 const DangNhap = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
-    const { loaiNguoiDungLogin } = controller;
+    const { userLogin } = controller;
 
     const [email, setEmail] = React.useState('');
     const [password, setPassword] = React.useState('');
     const [hiddenPassword, setHiddenPassword] = React.useState(true);
     const [loginError, setLoginError] = React.useState('');
+    const [loading, setLoading] = React.useState(true);
 
     const hasErrorEmail = () => {
         return email.trim() !== '' && (!email.includes('@') || !email.includes('.'));
@@ -55,36 +56,55 @@ const DangNhap = ({ navigation }) => {
 
     useEffect(() => {
         const fetchLoaiNguoiDung = async () => {
-            if (loaiNguoiDungLogin != null && loaiNguoiDungLogin.id_loaiNguoiDung) {
+            if (userLogin && userLogin.id_loaiNguoiDung) {
                 try {
-                    const loaiNguoiDungRef = await firestore()
+                    const loaiNguoiDungDoc = await firestore()
                         .collection("LoaiNguoiDung")
-                        .doc(loaiNguoiDungLogin.id_loaiNguoiDung)
+                        .doc(userLogin.id_loaiNguoiDung)
                         .get();
 
-                    if (loaiNguoiDungRef.exists) {
-                        const loaiData = loaiNguoiDungRef.data();
-                        const role = loaiData.tenLoaiNguoiDung?.toLowerCase(); // vd: "Admin" hoặc "Customer"
+                    if (loaiNguoiDungDoc.exists) {
+                        const data = loaiNguoiDungDoc.data();
+                        const tenLoai = data?.tenLoai;
 
-                        if (role === "admin") {
-                            navigation.reset({ index: 0, routes: [{ name: "Admin" }] });
-                        } else if (role === "customer") {
-                            navigation.reset({ index: 0, routes: [{ name: "Customer" }] });
-                        } else {
-                            console.log("Không có quyền truy cập.");
-                        }
+                        console.log("Loại người dùng:", tenLoai);
+
+                        setTimeout(() => {
+                            setLoading(false);
+
+                            if (tenLoai === "Admin") {
+                                navigation.reset({ index: 0, routes: [{ name: "TrangChuTro" }] });
+                            } else if (tenLoai === "Khách thuê") {
+                                navigation.reset({ index: 0, routes: [{ name: "TrangChuKhachThue" }] });
+                            } else if (tenLoai === "Chủ trọ") {
+                                navigation.reset({ index: 0, routes: [{ name: "TrangChuChuTro" }] });
+                            } else {
+                                console.log("Loại người dùng không hợp lệ:", tenLoai);
+                            }
+                        }, 1000); // Delay 1s
                     } else {
                         console.log("Không tìm thấy loại người dùng.");
+                        setLoading(false);
                     }
                 } catch (error) {
                     console.log("Lỗi khi truy vấn loại người dùng:", error);
+                    setLoading(false);
                 }
+            } else {
+                setLoading(false);
             }
         };
 
         fetchLoaiNguoiDung();
-    }, [loaiNguoiDungLogin]);
+    }, [userLogin]);
 
+    if (loading) {
+        return (
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+                <ActivityIndicator size="large" color="#6200ee" />
+            </View>
+        );
+    }
     return (
         <View style={styles.container}>
             <StatusBar backgroundColor="#ffffff" barStyle="dark-content" />

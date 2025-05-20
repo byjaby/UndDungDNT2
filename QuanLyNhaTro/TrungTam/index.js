@@ -16,9 +16,11 @@ const LICHSUTHANHTOAN = firestore().collection("LichSuThanhToan");
 const reducer = (state, action) => {
     switch (action.type) {
         case "USER_LOGIN":
-            return { ...state, loaiNguoiDungLogin: action.value };
+            return { ...state, userLogin: action.value };
         case "LOGOUT":
-            return { ...state, loaiNguoiDungLogin: null };
+            return { ...state, userLogin: null };
+        case "SET_CHUTRO":
+            return { ...state, chuTro: action.value };
         case "SET_PHONG":
             return { ...state, phong: action.value };
         case "UPDATE_PHONG":
@@ -42,7 +44,8 @@ const reducer = (state, action) => {
 };
 
 const initialState = {
-    loaiNguoiDungLogin: null,
+    userLogin: null,
+    chuTro: [],
     phong: [],
     dichVu: [],
     tienPhong: [],
@@ -70,27 +73,50 @@ const useMyContextController = () => {
 
 const dangNhap = async (dispatch, email, password) => {
     dispatch({ type: "SET_LOADING", value: true });
+
     try {
-        const userCredential = await auth().signInWithEmailAndPassword(email, password);
-        const uid = userCredential.user.uid;
+        const userCredential = await auth().signInWithEmailAndPassword(email.trim(), password);
+        const firebaseUID = userCredential.user.uid;
 
-        const userDoc = await firestore().collection("KhachThue").doc(uid).get();
-        if (userDoc.exists) {
-            const userData = userDoc.data();
+        const collections = ["Admin", "ChuTro", "KhachThue"];
+        let userData = null;
+        let foundCollection = null;
+        let foundDocId = null;
 
-            if (userData.email !== email) {
-                dispatch({ type: "SET_ERROR", value: "Thông tin người dùng không chính xác." });
-                return { success: false, message: "Thông tin người dùng không chính xác. Vui lòng liên hệ quản trị viên." };
+        for (const collectionName of collections) {
+            const snapshot = await firestore()
+                .collection(collectionName)
+                .where("email", "==", email.trim())
+                .limit(1)
+                .get();
+
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                userData = doc.data();
+                foundCollection = collectionName;
+                foundDocId = doc.id;
+                break;
             }
-
-            dispatch({ type: "USER_LOGIN", value: { user_id: uid, ...userData } });
-            dispatch({ type: "SET_LOADING", value: false });
-            return { success: true };
-        } else {
-            dispatch({ type: "SET_ERROR", value: "Không tìm thấy người dùng trong hệ thống." });
-            dispatch({ type: "SET_LOADING", value: false });
-            return { success: false, message: "Tài khoản không tồn tại trong hệ thống (Firestore)." };
         }
+
+        if (!userData) {
+            dispatch({ type: "SET_ERROR", value: "Tài khoản không tồn tại trong hệ thống." });
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Không tìm thấy người dùng trong cơ sở dữ liệu." };
+        }
+
+        dispatch({
+            type: "USER_LOGIN",
+            value: {
+                user_id: foundDocId,
+                ...userData,
+                collection: foundCollection, // thông tin dùng sau này nếu cần
+            },
+        });
+
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: true };
+
     } catch (error) {
         let message = "Đăng nhập thất bại.";
         if (error.code === 'auth/user-not-found') {
@@ -113,24 +139,20 @@ const dangKy = async (dispatch, fullName, email, password, phone, address) => {
     dispatch({ type: "SET_LOADING", value: true });
 
     try {
-        // ✅ Kiểm tra số điện thoại đã tồn tại chưa
         const phoneQuery = await KHACHTHUE.where("phone", "==", phone.trim()).get();
         if (!phoneQuery.empty) {
             throw new Error("Số điện thoại đã được sử dụng.");
         }
 
-        // Tạo tài khoản
         const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
         const uid = response.user.uid;
 
-        // Lấy loại người dùng 'Khách thuê'
         const loaiQuery = await LOAINGUOIDUNG.where("tenLoai", "==", "Khách thuê").get();
         if (loaiQuery.empty) {
             throw new Error("Không tìm thấy loại người dùng 'Khách thuê'.");
         }
         const idLoaiKhachThue = loaiQuery.docs[0].id;
 
-        // Lưu thông tin người dùng
         await KHACHTHUE.doc(uid).set({
             fullName,
             email: email.trim(),
@@ -175,10 +197,86 @@ const dangXuat = (dispatch, navigation) => {
         });
 };
 
+const loadChuTro = async (dispatch) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore().collection("ChuTro").get();
+
+        const danhSachChuTro = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_CHUTRO', value: danhSachChuTro });
+        dispatch({ type: 'SET_LOADING', value: false });
+    } catch (error) {
+        console.error("Lỗi khi load Chủ trọ:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
+const themChuTro = async (dispatch, fullName, email, password, phone, address, creatorId) => {
+    dispatch({ type: "SET_LOADING", value: true });
+
+    try {
+        // Kiểm tra phone đã tồn tại chưa
+        const phoneQuery = await firestore().collection("ChuTro").where("phone", "==", phone.trim()).get();
+        if (!phoneQuery.empty) {
+            throw new Error("Số điện thoại đã được sử dụng.");
+        }
+
+        // Tạo tài khoản với email & password
+        const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
+        const uid = response.user.uid;
+
+        // Lấy id loại người dùng "Chủ trọ"
+        const loaiQuery = await firestore().collection("LoaiNguoiDung").where("tenLoai", "==", "Chủ trọ").get();
+        if (loaiQuery.empty) {
+            throw new Error("Không tìm thấy loại người dùng 'Chủ trọ'.");
+        }
+        const idLoaiChuTro = loaiQuery.docs[0].id;
+
+        // Lưu dữ liệu chủ trọ vào Firestore
+        await firestore().collection("ChuTro").doc(uid).set({
+            fullName,
+            email: email.trim(),
+            phone: phone.trim(),
+            address,
+            id_loaiNguoiDung: idLoaiChuTro,
+            creator: creatorId,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+
+        dispatch({ type: "SET_LOADING", value: false });
+
+        return { success: true, idChuTro: uid };
+
+    } catch (error) {
+        let message = "Thêm Chủ trọ thất bại.";
+        if (error.code === "auth/email-already-in-use") {
+            message = "Email đã được sử dụng.";
+        } else if (error.code === "auth/invalid-email") {
+            message = "Email không hợp lệ.";
+        } else if (error.code === "auth/weak-password") {
+            message = "Mật khẩu quá yếu (tối thiểu 6 ký tự).";
+        } else {
+            message = error.message;
+        }
+
+        dispatch({ type: "SET_ERROR", value: message });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: false, message };
+    }
+};
+
 export {
     MyContextControllerProvider,
     useMyContextController,
     dangNhap,
     dangKy,
-    dangXuat
+    dangXuat,
+    loadChuTro,
+    themChuTro
 };
