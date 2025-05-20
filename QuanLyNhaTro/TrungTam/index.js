@@ -17,6 +17,8 @@ const reducer = (state, action) => {
     switch (action.type) {
         case "USER_LOGIN":
             return { ...state, userLogin: action.value };
+        case "SET_USER_LOGIN":
+            return { ...state, userLogin: action.value };
         case "LOGOUT":
             return { ...state, userLogin: null };
         case "SET_CHUTRO":
@@ -192,7 +194,7 @@ const dangXuat = (dispatch, navigation) => {
             dispatch({ type: "LOGOUT" });
             navigation.reset({
                 index: 0,
-                routes: [{ name: "DangNhap" }],
+                routes: [{ name: "DangNhap" }], // Tên screen đăng nhập của bạn
             });
         })
         .catch(() => {
@@ -344,6 +346,24 @@ const themKhachThue = async (dispatch, fullName, email, password, phone, address
     }
 };
 
+const loadHoSo = async (dispatch, userId) => {
+    try {
+        const doc = await firestore().collection("Admin").doc(userId).get();
+
+        if (doc.exists) {
+            dispatch({
+                type: "SET_USER_LOGIN",
+                value: {
+                    user_id: doc.id,
+                    ...doc.data(),
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải lại thông tin cá nhân:", error);
+    }
+};
+
 export {
     MyContextControllerProvider,
     useMyContextController,
@@ -353,5 +373,6 @@ export {
     loadChuTro,
     themChuTro,
     loadKhachThue,
-    themKhachThue
+    themKhachThue,
+    loadHoSo
 };

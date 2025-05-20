@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DieuKhienChuTro from "./DieuKhienChuTro";
 import DieuKhienKhachThue from "./DieuKhienKhachThue";
 import { useMyContextController } from "../TrungTam";
+import DieuKhienHoSo from "./DieuKhienHoSo";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -35,6 +36,7 @@ const Menu = () => {
                     ),
                 }}
             />
+
             <Tab.Screen
                 name="DieuKhienKhachThue"
                 component={DieuKhienKhachThue}
@@ -42,6 +44,17 @@ const Menu = () => {
                     tabBarLabel: "Khách thuê",
                     tabBarIcon: ({ color }) => (
                         <Icon name="account-group-outline" color={color} size={26} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="DieuKhienHoSo"
+                component={DieuKhienHoSo}
+                options={{
+                    tabBarLabel: "Hồ sơ",
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="account" color={color} size={26} />
                     ),
                 }}
             />
