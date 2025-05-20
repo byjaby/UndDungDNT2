@@ -4,6 +4,7 @@ import { Button } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from "../TrungTam";
+import auth from "@react-native-firebase/auth";
 
 const ChiTietChuTro = ({ route }) => {
     const [controller, dispatch] = useMyContextController();
@@ -39,13 +40,14 @@ const ChiTietChuTro = ({ route }) => {
 
     const resetPassword = async () => {
         try {
-            await firestore().collection("ChuTro").doc(user.id).update({
-                password: "123456",
-            });
-            Alert.alert("Thành công", "Đã đặt lại mật khẩu về '123456'");
+            await auth().sendPasswordResetEmail(user.email);
+            Alert.alert(
+                "Thành công",
+                "Đã gửi email đặt lại mật khẩu đến: " + user.email
+            );
         } catch (error) {
-            console.error("Lỗi khi đặt lại mật khẩu:", error);
-            Alert.alert("Lỗi", "Không thể đặt lại mật khẩu: " + error.message);
+            console.error("Lỗi khi gửi email reset password:", error);
+            Alert.alert("Lỗi", "Không thể gửi email: " + error.message);
         }
     };
 
