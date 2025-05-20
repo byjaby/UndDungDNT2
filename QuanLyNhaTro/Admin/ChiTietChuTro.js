@@ -37,6 +37,18 @@ const ChiTietChuTro = ({ route }) => {
         );
     };
 
+    const resetPassword = async () => {
+        try {
+            await firestore().collection("ChuTro").doc(user.id).update({
+                password: "123456",
+            });
+            Alert.alert("Thành công", "Đã đặt lại mật khẩu về '123456'");
+        } catch (error) {
+            console.error("Lỗi khi đặt lại mật khẩu:", error);
+            Alert.alert("Lỗi", "Không thể đặt lại mật khẩu: " + error.message);
+        }
+    };
+
     useEffect(() => {
         const fetchCreatorName = async () => {
             if (user.creator) {
@@ -108,6 +120,7 @@ const ChiTietChuTro = ({ route }) => {
                 >
                     Chỉnh sửa
                 </Button>
+
                 <Button
                     mode="contained"
                     icon="delete"
@@ -117,7 +130,18 @@ const ChiTietChuTro = ({ route }) => {
                     Xóa
                 </Button>
             </View>
+            <View style={styles.buttonContainer}>
 
+                <Button
+                    mode="contained"
+                    icon="lock-reset"
+                    onPress={resetPassword}
+                    style={[styles.button, { backgroundColor: "#2196f3" }]}
+                >
+                    Đặt lại mật khẩu
+                </Button>
+
+            </View>
         </View >
     );
 };
@@ -155,7 +179,7 @@ const styles = StyleSheet.create({
     buttonContainer: {
         flexDirection: "row",
         justifyContent: "space-around",
-        marginTop: 30,
+        marginTop: 15,
     },
     button: {
         paddingHorizontal: 16,
