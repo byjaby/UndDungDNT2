@@ -7,7 +7,7 @@ import SuaChuTro from "./SuaChuTro";
 
 const Stack = createStackNavigator();
 
-const DieuKhienAdmin = () => {
+const DieuKhienChuTro = () => {
     const [controller, dispatch] = useMyContextController();
     const { userLogin } = controller;
     return (
@@ -17,7 +17,7 @@ const DieuKhienAdmin = () => {
                 title: "NGƯỜI DÙNG: CHỦ TRỌ",
                 headerTitleAlign: "center",
                 headerStyle: {
-                    backgroundColor: "#03045E",  // màu hồng nhẹ (LightPink)
+                    backgroundColor: "#FFD166",
                     shadowColor: "#000",
                     shadowOffset: { width: 0, height: 4 },
                     shadowOpacity: 0.3,
@@ -46,4 +46,4 @@ const DieuKhienAdmin = () => {
     );
 };
 
-export default DieuKhienAdmin;
+export default DieuKhienChuTro;

@@ -73,7 +73,7 @@ const DangNhap = ({ navigation }) => {
                             setLoading(false);
 
                             if (tenLoai === "Admin") {
-                                navigation.reset({ index: 0, routes: [{ name: "TrangChuTro" }] });
+                                navigation.reset({ index: 0, routes: [{ name: "Menu" }] });
                             } else if (tenLoai === "Khách thuê") {
                                 navigation.reset({ index: 0, routes: [{ name: "TrangChuKhachThue" }] });
                             } else if (tenLoai === "Chủ trọ") {

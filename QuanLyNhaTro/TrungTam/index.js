@@ -21,6 +21,8 @@ const reducer = (state, action) => {
             return { ...state, userLogin: null };
         case "SET_CHUTRO":
             return { ...state, chuTro: action.value };
+        case "SET_KHACHTHUE":
+            return { ...state, khachThue: action.value };
         case "SET_PHONG":
             return { ...state, phong: action.value };
         case "UPDATE_PHONG":
@@ -46,6 +48,7 @@ const reducer = (state, action) => {
 const initialState = {
     userLogin: null,
     chuTro: [],
+    khachThue: [],
     phong: [],
     dichVu: [],
     tienPhong: [],
@@ -211,7 +214,7 @@ const loadChuTro = async (dispatch) => {
         dispatch({ type: 'SET_CHUTRO', value: danhSachChuTro });
         dispatch({ type: 'SET_LOADING', value: false });
     } catch (error) {
-        console.error("Lỗi khi load Chủ trọ:", error);
+        console.error("Lỗi khi tải dữ liệu Chủ trọ:", error);
         dispatch({ type: 'SET_ERROR', value: error.message });
         dispatch({ type: 'SET_LOADING', value: false });
     }
@@ -271,6 +274,76 @@ const themChuTro = async (dispatch, fullName, email, password, phone, address, c
     }
 };
 
+const loadKhachThue = async (dispatch) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore().collection("KhachThue").get();
+
+        const danhSachKhachThue = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_KHACHTHUE', value: danhSachKhachThue });
+        dispatch({ type: 'SET_LOADING', value: false });
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu Khách thuê trọ:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
+const themKhachThue = async (dispatch, fullName, email, password, phone, address) => {
+    dispatch({ type: "SET_LOADING", value: true });
+
+    try {
+        // Kiểm tra phone đã tồn tại chưa
+        const phoneQuery = await firestore().collection("KhachThue").where("phone", "==", phone.trim()).get();
+        if (!phoneQuery.empty) {
+            throw new Error("Số điện thoại đã được sử dụng.");
+        }
+
+        const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
+        const uid = response.user.uid;
+
+        const loaiQuery = await firestore().collection("LoaiNguoiDung").where("tenLoai", "==", "Khách thuê").get();
+        if (loaiQuery.empty) {
+            throw new Error("Không tìm thấy loại người dùng 'Chủ trọ'.");
+        }
+        const idLoaiKhachThue = loaiQuery.docs[0].id;
+
+        await firestore().collection("KhachThue").doc(uid).set({
+            fullName,
+            email: email.trim(),
+            phone: phone.trim(),
+            address,
+            id_loaiNguoiDung: idLoaiKhachThue,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+
+        dispatch({ type: "SET_LOADING", value: false });
+
+        return { success: true, idKhachThue: uid };
+
+    } catch (error) {
+        let message = "Thêm khách thuê thất bại.";
+        if (error.code === "auth/email-already-in-use") {
+            message = "Email đã được sử dụng.";
+        } else if (error.code === "auth/invalid-email") {
+            message = "Email không hợp lệ.";
+        } else if (error.code === "auth/weak-password") {
+            message = "Mật khẩu quá yếu (tối thiểu 6 ký tự).";
+        } else {
+            message = error.message;
+        }
+
+        dispatch({ type: "SET_ERROR", value: message });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: false, message };
+    }
+};
+
 export {
     MyContextControllerProvider,
     useMyContextController,
@@ -278,5 +351,7 @@ export {
     dangKy,
     dangXuat,
     loadChuTro,
-    themChuTro
+    themChuTro,
+    loadKhachThue,
+    themKhachThue
 };

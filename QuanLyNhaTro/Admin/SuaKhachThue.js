@@ -5,7 +5,7 @@ import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { useMyContextController } from "../TrungTam";
 
-const SuaChuTro = ({ route }) => {
+const SuaKhachThue = ({ route }) => {
     const navigation = useNavigation();
     const { user } = route.params;
     const [controller, dispatch] = useMyContextController();
@@ -31,18 +31,17 @@ const SuaChuTro = ({ route }) => {
             Alert.alert("Lỗi", "Số điện thoại phải đủ 10 chữ số.");
             return;
         }
-        const creatorId = userLogin?.user_id || null;
+
         try {
-            await firestore().collection("ChuTro").doc(user.id).update({
+            await firestore().collection("KhachThue").doc(user.id).update({
                 fullName,
                 email,
                 phone,
-                address,
-                creator: creatorId
+                address
             });
 
-            Alert.alert("Thành công", "Đã cập nhật thông tin chủ trọ.");
-            navigation.navigate("DSChuTro");
+            Alert.alert("Thành công", "Đã cập nhật thông tin khách thuê.");
+            navigation.navigate("DSKhachThue");
         } catch (error) {
             Alert.alert("Lỗi", "Không thể lưu: " + error.message);
         }
@@ -50,7 +49,7 @@ const SuaChuTro = ({ route }) => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Chỉnh sửa chủ trọ</Text>
+            <Text style={styles.title}>Chỉnh sửa khách thuê</Text>
 
             <TextInput
                 label="Họ tên"
@@ -99,7 +98,7 @@ const SuaChuTro = ({ route }) => {
     );
 };
 
-export default SuaChuTro;
+export default SuaKhachThue;
 
 const styles = StyleSheet.create({
     container: {
