@@ -73,11 +73,11 @@ const DangNhap = ({ navigation }) => {
                             setLoading(false);
 
                             if (tenLoai === "Admin") {
-                                navigation.reset({ index: 0, routes: [{ name: "Menu" }] });
+                                navigation.reset({ index: 0, routes: [{ name: "MenuAdmin" }] });
                             } else if (tenLoai === "Khách thuê") {
                                 navigation.reset({ index: 0, routes: [{ name: "TrangChuKhachThue" }] });
                             } else if (tenLoai === "Chủ trọ") {
-                                navigation.reset({ index: 0, routes: [{ name: "TrangChuChuTro" }] });
+                                navigation.reset({ index: 0, routes: [{ name: "MenuChuTro" }] });
                             } else {
                                 console.log("Loại người dùng không hợp lệ:", tenLoai);
                             }

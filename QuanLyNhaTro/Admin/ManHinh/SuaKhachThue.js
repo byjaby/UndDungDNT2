@@ -3,9 +3,9 @@ import { View, StyleSheet, Alert, ScrollView } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
-import { useMyContextController } from "../TrungTam";
+import { useMyContextController } from "../../TrungTam";
 
-const SuaThongTinAdmin = ({ route }) => {
+const SuaKhachThue = ({ route }) => {
     const navigation = useNavigation();
     const { user } = route.params;
     const [controller, dispatch] = useMyContextController();
@@ -15,42 +15,33 @@ const SuaThongTinAdmin = ({ route }) => {
     } else {
         console.log("Chưa có userLogin");
     }
-    const [hoTen, setFullName] = useState(user.hoTen || "");
+    const [fullName, setFullName] = useState(user.fullName || "");
     const [email, setEmail] = useState(user.email || "");
-    const [sDT, setPhone] = useState(user.sDT || "");
-    const [diaChi, setAddress] = useState(user.diaChi || "");
+    const [phone, setPhone] = useState(user.phone || "");
+    const [address, setAddress] = useState(user.address || "");
 
     const handleSave = async () => {
-        if (!hoTen.trim()) {
+        if (!fullName.trim()) {
             Alert.alert("Lỗi", "Vui lòng nhập họ tên.");
             return;
         }
 
         const phoneRegex = /^\d{10}$/;
-        if (!phoneRegex.test(sDT)) {
+        if (!phoneRegex.test(phone)) {
             Alert.alert("Lỗi", "Số điện thoại phải đủ 10 chữ số.");
             return;
         }
 
         try {
-            await firestore().collection("Admin").doc(user.user_id).update({
-                hoTen,
+            await firestore().collection("KhachThue").doc(user.id).update({
+                fullName,
                 email,
-                sDT,
-                diaChi
+                phone,
+                address
             });
-            dispatch({
-                type: "SET_USER_LOGIN",
-                value: {
-                    ...user,
-                    hoTen,
-                    email,
-                    sDT,
-                    diaChi
-                }
-            });
-            Alert.alert("Thành công", "Đã cập nhật thông tin cá nhân.");
-            navigation.navigate("HoSo");
+
+            Alert.alert("Thành công", "Đã cập nhật thông tin khách thuê.");
+            navigation.navigate("DSKhachThue");
         } catch (error) {
             Alert.alert("Lỗi", "Không thể lưu: " + error.message);
         }
@@ -58,9 +49,11 @@ const SuaThongTinAdmin = ({ route }) => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+            <Text style={styles.title}>Chỉnh sửa khách thuê</Text>
+
             <TextInput
                 label="Họ tên"
-                value={hoTen}
+                value={fullName}
                 onChangeText={setFullName}
                 mode="outlined"
                 style={styles.input}
@@ -77,7 +70,7 @@ const SuaThongTinAdmin = ({ route }) => {
 
             <TextInput
                 label="Số điện thoại"
-                value={sDT}
+                value={phone}
                 onChangeText={setPhone}
                 mode="outlined"
                 keyboardType="phone-pad"
@@ -86,7 +79,7 @@ const SuaThongTinAdmin = ({ route }) => {
 
             <TextInput
                 label="Địa chỉ"
-                value={diaChi}
+                value={address}
                 onChangeText={setAddress}
                 mode="outlined"
                 multiline
@@ -105,7 +98,7 @@ const SuaThongTinAdmin = ({ route }) => {
     );
 };
 
-export default SuaThongTinAdmin;
+export default SuaKhachThue;
 
 const styles = StyleSheet.create({
     container: {

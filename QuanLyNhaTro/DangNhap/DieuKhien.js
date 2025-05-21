@@ -2,9 +2,10 @@ import { createStackNavigator } from "@react-navigation/stack";
 import DangNhap from "./DangNhap";
 import KhachDangKy from "./KhachDangKy";
 import QuenMK from "./QuenMK";
-import Menu from "../Admin/Menu";
 import ChonDangKy from "./ChonDangKy";
 import ChuDangKy from "./ChuDangKy";
+import MenuAdmin from "../Admin/DieuKhien/MenuAdmin";
+import MenuChuTro from "../ChuTro/DieuKhien/MenuChuTro";
 
 const Stack = createStackNavigator();
 
@@ -21,7 +22,8 @@ const DieuKhien = () => {
             <Stack.Screen name="KhachDangKy" component={KhachDangKy} />
             <Stack.Screen name="ChuDangKy" component={ChuDangKy} />
             <Stack.Screen name="QuenMK" component={QuenMK} />
-            <Stack.Screen name="Menu" component={Menu} />
+            <Stack.Screen name="MenuAdmin" component={MenuAdmin} />
+            <Stack.Screen name="MenuChuTro" component={MenuChuTro} />
         </Stack.Navigator>
     );
 };

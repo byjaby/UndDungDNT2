@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { Button } from "react-native-paper";
-import { loadHoSo, useMyContextController } from "../TrungTam";
+import { loadHoSo, useMyContextController } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 
 const HoSo = ({ navigation }) => {

@@ -1,9 +1,9 @@
 import { createStackNavigator } from "@react-navigation/stack";
-import { useMyContextController } from "../TrungTam";
-import DSKhachThue from "./DSKhachThue";
-import ThemKhachThue from "./ThemKhachThue";
-import ChiTietKhachThue from "./ChiTietKhachThue";
-import SuaKhachThue from "./SuaKhachThue";
+import { useMyContextController } from "../../TrungTam";
+import DSKhachThue from "../ManHinh/DSKhachThue";
+import ThemKhachThue from "../ManHinh/ThemKhachThue";
+import ChiTietKhachThue from "../ManHinh/ChiTietKhachThue";
+import SuaKhachThue from "../ManHinh/SuaKhachThue";
 
 const Stack = createStackNavigator();
 

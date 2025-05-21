@@ -3,12 +3,12 @@ import { createMaterialBottomTabNavigator } from "@react-navigation/material-bot
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import DieuKhienChuTro from "./DieuKhienChuTro";
 import DieuKhienKhachThue from "./DieuKhienKhachThue";
-import { useMyContextController } from "../TrungTam";
+import { useMyContextController } from "../../TrungTam";
 import DieuKhienHoSo from "./DieuKhienHoSo";
 
 const Tab = createMaterialBottomTabNavigator();
 
-const Menu = () => {
+const MenuAdmin = () => {
     const [controller] = useMyContextController();
 
     return (
@@ -62,4 +62,4 @@ const Menu = () => {
     );
 };
 
-export default Menu;
+export default MenuAdmin;

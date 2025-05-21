@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
-import { themKhachThue, useMyContextController } from "../TrungTam";
+import { themChuTro, useMyContextController } from "../../TrungTam";
 
-const ThemKhachThue = ({ navigation }) => {
+const ThemChuTro = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
     const { userLogin } = controller;
     if (userLogin) {
@@ -35,18 +35,20 @@ const ThemKhachThue = ({ navigation }) => {
             return;
         }
 
-        const result = await themKhachThue(dispatch, fullName, email, password, phone, address);
+        const creatorId = userLogin?.user_id || null;
+
+        const result = await themChuTro(dispatch, fullName, email, password, phone, address, creatorId);
         if (result.success) {
-            Alert.alert("Thành công", `Đã thêm khách thuê mới`);
+            Alert.alert("Thành công", `Đã thêm Chủ trọ mới`);
             navigation.goBack();
         } else {
-            Alert.alert("Lỗi", result.message || "Thêm khách thuê thất bại.");
+            Alert.alert("Lỗi", result.message || "Thêm Chủ trọ thất bại.");
         }
     };
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Thêm khách thuê mới</Text>
+            <Text style={styles.title}>Thêm Chủ trọ mới</Text>
             <TextInput
                 label="Họ và tên"
                 value={fullName}
@@ -113,4 +115,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ThemKhachThue;
+export default ThemChuTro;

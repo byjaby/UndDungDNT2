@@ -3,21 +3,23 @@ import { View, Text, StyleSheet, Alert } from "react-native";
 import { Button } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from '@react-navigation/native';
-import { useMyContextController } from "../TrungTam";
+import { useMyContextController } from "../../TrungTam";
 import auth from "@react-native-firebase/auth";
 
-const ChiTietKhachThue = ({ route }) => {
+const ChiTietChuTro = ({ route }) => {
     const [controller, dispatch] = useMyContextController();
     const navigation = useNavigation();
     const { user } = route.params;
 
-    console.log("user.id: ", user.id);
+    const [creatorName, setCreatorName] = React.useState("Đang tải...");
+    console.log("ID người tạo (creator):", user.creator);
+    console.log("user.id: ", user.id); // Kiểm tra giá trị
 
     const deleteUser = async () => {
         try {
-            await firestore().collection("KhachThue").doc(user.id).delete();
-            Alert.alert("Thành công", "Đã xóa khách thuê.");
-            dispatch({ type: 'RELOAD_KHACHTHUE' });
+            await firestore().collection("ChuTro").doc(user.id).delete();
+            Alert.alert("Thành công", "Đã xóa chủ trọ.");
+            dispatch({ type: 'RELOAD_CHUTRO' });
             navigation.goBack();
         } catch (error) {
             Alert.alert("Lỗi", "Không thể xóa: " + error.message);
@@ -28,7 +30,7 @@ const ChiTietKhachThue = ({ route }) => {
     const handleDelete = () => {
         Alert.alert(
             "Xác nhận xóa",
-            "Bạn có chắc chắn muốn xóa khách thuê này?",
+            "Bạn có chắc chắn muốn xóa chủ trọ này?",
             [
                 { text: "Hủy", style: "cancel" },
                 { text: "Xóa", style: "destructive", onPress: deleteUser }
@@ -49,9 +51,36 @@ const ChiTietKhachThue = ({ route }) => {
         }
     };
 
+    useEffect(() => {
+        const fetchCreatorName = async () => {
+            if (user.creator) {
+                try {
+                    const adminDoc = await firestore()
+                        .collection("Admin")
+                        .doc(user.creator)
+                        .get();
+
+                    if (adminDoc.exists) {
+                        const adminData = adminDoc.data();
+                        setCreatorName(adminData?.hoTen || "Không rõ");
+                    } else {
+                        setCreatorName("Không tìm thấy");
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi lấy thông tin Admin:", error);
+                    setCreatorName("Lỗi");
+                }
+            } else {
+                setCreatorName("Không có");
+            }
+        };
+
+        fetchCreatorName();
+    }, [user.creator]);
+
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Chi tiết khách thuê</Text>
+            <Text style={styles.title}>Chi tiết chủ trọ</Text>
 
             <View style={styles.row}>
                 <Text style={styles.label}>Họ tên:</Text>
@@ -74,6 +103,11 @@ const ChiTietKhachThue = ({ route }) => {
             </View>
 
             <View style={styles.row}>
+                <Text style={styles.label}>Người tạo:</Text>
+                <Text style={styles.value}>{creatorName || "Chưa có"}</Text>
+            </View>
+
+            <View style={styles.row}>
                 <Text style={styles.label}>Ngày tạo:</Text>
                 <Text style={styles.value}>
                     {user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : "Không rõ"}
@@ -83,7 +117,7 @@ const ChiTietKhachThue = ({ route }) => {
                 <Button
                     mode="contained"
                     icon="pencil"
-                    onPress={() => navigation.navigate("SuaKhachThue", { user })}
+                    onPress={() => navigation.navigate("SuaChuTro", { user })}
                     style={[styles.button, { backgroundColor: "#66E879" }]}
                 >
                     Chỉnh sửa
@@ -114,7 +148,7 @@ const ChiTietKhachThue = ({ route }) => {
     );
 };
 
-export default ChiTietKhachThue;
+export default ChiTietChuTro;
 
 const styles = StyleSheet.create({
     container: {

@@ -3,7 +3,7 @@ import { View, StyleSheet, Alert, ScrollView } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
-import { useMyContextController } from "../TrungTam";
+import { useMyContextController } from "../../TrungTam";
 
 const SuaChuTro = ({ route }) => {
     const navigation = useNavigation();

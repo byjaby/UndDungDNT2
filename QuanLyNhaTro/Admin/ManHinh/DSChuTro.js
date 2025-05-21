@@ -1,41 +1,41 @@
 import React, { useEffect } from "react";
 import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { IconButton, Text } from "react-native-paper";
-import { useMyContextController, loadKhachThue } from "../TrungTam";
+import { useMyContextController, loadChuTro } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 
-const DSKhachThue = ({ navigation }) => {
+const DSChuTro = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
-    const { khachThue } = controller;
+    const { chuTro } = controller;
 
     useFocusEffect(
         React.useCallback(() => {
-            loadKhachThue(dispatch);
+            loadChuTro(dispatch);
         }, [])
     );
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => navigation.navigate("ChiTietKhachThue", { user: item })}
+            onPress={() => navigation.navigate("ChiTietChuTro", { user: item })}
         >
             <Text style={styles.name}>{item.fullName}</Text>
         </TouchableOpacity>
     );
 
-    const soLuongKhachThue = khachThue?.length || 0;
+    const soLuongChuTro = chuTro?.length || 0;
 
     return (
         <View style={{ flex: 1, padding: 10 }}>
             <View style={styles.header}>
                 <Text style={styles.title}>
-                    {soLuongKhachThue > 0 ? `Danh sách khách thuê trọ (${soLuongKhachThue}):` : "Chưa có khách thuê trọ nào."}
+                    {soLuongChuTro > 0 ? `Danh sách chủ trọ (${soLuongChuTro}):` : "Chưa có chủ trọ nào."}
                 </Text>
                 <IconButton
                     icon="plus"
                     iconColor="#fff"
                     size={28}
-                    onPress={() => navigation.navigate("ThemKhachThue")}
+                    onPress={() => navigation.navigate("ThemChuTro")}
                     style={{
                         backgroundColor: "#e91e63",
                         borderRadius: 28,
@@ -43,9 +43,9 @@ const DSKhachThue = ({ navigation }) => {
                 />
             </View>
 
-            {soLuongKhachThue > 0 && (
+            {soLuongChuTro > 0 && (
                 <FlatList
-                    data={khachThue}
+                    data={chuTro}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={renderItem}
                     contentContainerStyle={{ paddingBottom: 20 }}
@@ -84,4 +84,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DSKhachThue;
+export default DSChuTro;

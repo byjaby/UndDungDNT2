@@ -1,6 +1,5 @@
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { Button, HelperText, TextInput, ActivityIndicator } from "react-native-paper";
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import React from 'react';
 import { useMyContextController, khachDangKy } from '../TrungTam';
 

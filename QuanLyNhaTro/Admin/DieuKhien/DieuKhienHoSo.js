@@ -2,11 +2,11 @@ import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import { TouchableOpacity, Alert } from "react-native";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { useMyContextController, dangXuat } from "../TrungTam";
-import HoSo from "./HoSo";
+import { useMyContextController, dangXuat } from "../../TrungTam";
+import HoSo from "../ManHinh/HoSo";
 import { useNavigation } from "@react-navigation/native";
-import SuaThongTinAdmin from "./SuaThongTinAdmin";
-import DoiMKAdmin from "./DoiMKAdmin";
+import SuaThongTinAdmin from "../ManHinh/SuaThongTinAdmin";
+import DoiMKAdmin from "../ManHinh/DoiMKAdmin";
 
 const Stack = createStackNavigator();
 
