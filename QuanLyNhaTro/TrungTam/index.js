@@ -140,7 +140,7 @@ const dangNhap = async (dispatch, email, password) => {
     }
 };
 
-const dangKy = async (dispatch, fullName, email, password, phone, address) => {
+const KhachDangKy = async (dispatch, fullName, email, password, phone, address) => {
     dispatch({ type: "SET_LOADING", value: true });
 
     try {
@@ -164,6 +164,54 @@ const dangKy = async (dispatch, fullName, email, password, phone, address) => {
             phone: phone.trim(),
             address,
             id_loaiNguoiDung: idLoaiKhachThue,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+
+        return { success: true };
+
+    } catch (error) {
+        let message = "Đăng ký thất bại.";
+        if (error.code === "auth/email-already-in-use") {
+            message = "Email đã được sử dụng.";
+        } else if (error.code === "auth/invalid-email") {
+            message = "Email không hợp lệ.";
+        } else if (error.code === "auth/weak-password") {
+            message = "Mật khẩu quá yếu (tối thiểu 6 ký tự).";
+        } else {
+            message = error.message;
+        }
+
+        dispatch({ type: "SET_ERROR", value: message });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: false, message };
+    }
+};
+
+const chuDangKy = async (dispatch, fullName, email, password, phone, tenTro, address) => {
+    dispatch({ type: "SET_LOADING", value: true });
+
+    try {
+        const phoneQuery = await KHACHTHUE.where("phone", "==", phone.trim()).get();
+        if (!phoneQuery.empty) {
+            throw new Error("Số điện thoại đã được sử dụng.");
+        }
+
+        const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
+        const uid = response.user.uid;
+
+        const loaiQuery = await LOAINGUOIDUNG.where("tenLoai", "==", "Chủ trọ").get();
+        if (loaiQuery.empty) {
+            throw new Error("Không tìm thấy loại người dùng 'Chủ trọ'.");
+        }
+        const idLoaiChuTro = loaiQuery.docs[0].id;
+
+        await CHUTRO.doc(uid).set({
+            fullName,
+            email: email.trim(),
+            phone: phone.trim(),
+            tenTro,
+            address,
+            id_loaiNguoiDung: idLoaiChuTro,
             createdAt: firestore.FieldValue.serverTimestamp(),
         });
 
@@ -368,7 +416,8 @@ export {
     MyContextControllerProvider,
     useMyContextController,
     dangNhap,
-    dangKy,
+    KhachDangKy,
+    chuDangKy,
     dangXuat,
     loadChuTro,
     themChuTro,

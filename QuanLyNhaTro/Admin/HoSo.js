@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 const HoSo = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
     const { userLogin } = controller;
+
     if (!userLogin) {
         return (
             <View style={styles.container}>

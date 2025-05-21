@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, StatusBar, Alert } from 'react-native';
 import { Button, HelperText, TextInput, ActivityIndicator } from "react-native-paper";
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import React from 'react';
-import { useMyContextController, dangKy } from '../TrungTam';
+import { useMyContextController, chuDangKy } from '../TrungTam';
+import firestore from "@react-native-firebase/firestore";
 
-const DangKy = ({ navigation }) => {
+const ChuDangKy = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
 
     const [fullName, setFullName] = React.useState('');
@@ -12,6 +12,8 @@ const DangKy = ({ navigation }) => {
     const [password, setPassword] = React.useState('');
     const [passwordConfirm, setPasswordConfirm] = React.useState('');
     const [phone, setPhone] = React.useState('');
+    const [tenTro, setTenTro] = React.useState('');
+    const [isTenTroAvailable, setIsTenTroAvailable] = React.useState(true);
     const [address, setAddress] = React.useState('');
     const [hiddenPassword, setHiddenPassword] = React.useState(true);
     const [hiddenPasswordConfirm, setHiddenPasswordConfirm] = React.useState(true);
@@ -38,8 +40,34 @@ const DangKy = ({ navigation }) => {
         return phone.trim().length === 10 && /^\d+$/.test(phone);
     };
 
+    const CHUTRO = firestore().collection("ChuTro");
+
+    const checkTenTro = async () => {
+        if (tenTro.trim() === '') return true; // Cho phép khi rỗng
+        try {
+            const snapshot = await CHUTRO.where("tenTro", "==", tenTro.trim()).get();
+            return snapshot.empty;
+        } catch (error) {
+            console.error("Lỗi khi kiểm tra tên trọ:", error);
+            return true; // Cho phép nếu lỗi
+        }
+    };
+
+    React.useEffect(() => {
+        if (!submitted) return;
+        const delay = setTimeout(() => {
+            checkTenTro();
+        }, 500);
+        return () => clearTimeout(delay);
+    }, [tenTro]);
+
     const handleCreateAccount = async () => {
         setSubmitted(true);
+
+        const isAvailable = await checkTenTro();
+        setIsTenTroAvailable(isAvailable);
+
+        if (!isAvailable) return;
 
         if (
             isFullNameValid() &&
@@ -49,7 +77,7 @@ const DangKy = ({ navigation }) => {
             isPhoneValid()
         ) {
             setLoading(true);
-            const result = await dangKy(dispatch, fullName, email, password, phone, address);
+            const result = await chuDangKy(dispatch, fullName, email, password, phone, tenTro, address);
             if (result.success) {
                 Alert.alert("Thành công", "Tạo tài khoản thành công!");
                 navigation.navigate("DangNhap");
@@ -89,8 +117,6 @@ const DangKy = ({ navigation }) => {
                     <HelperText type="error" visible={submitted && !isFullNameValid()}>
                         Họ tên không được để trống
                     </HelperText>
-
-                    {/* Email */}
 
                     <TextInput
                         style={styles.input}
@@ -174,7 +200,22 @@ const DangKy = ({ navigation }) => {
                         Số điện thoại phải gồm đúng 10 số
                     </HelperText>
 
-                    {/* Địa chỉ */}
+                    <TextInput
+                        style={styles.input}
+                        label="Tên nhà trọ"
+                        value={tenTro}
+                        onChangeText={setTenTro}
+                        outlineColor="#e0e0e0"
+                        activeOutlineColor="#e91e63"
+                        contentStyle={styles.inputContent}
+                        theme={{ roundness: 10 }}
+                        left={<TextInput.Icon icon="map" color="#666" />}
+                    />
+
+                    <HelperText type="error" visible={submitted && !isTenTroAvailable}>
+                        Tên trọ đã tồn tại. Nhập tên trọ khác
+                    </HelperText>
+
                     <TextInput
                         style={styles.input}
                         label="Địa chỉ"
@@ -186,6 +227,7 @@ const DangKy = ({ navigation }) => {
                         theme={{ roundness: 10 }}
                         left={<TextInput.Icon icon="home" color="#666" />}
                     />
+
                     {loading ? (
                         <ActivityIndicator size="large" color="#e91e63" style={styles.loading} />
                     ) : (
@@ -281,4 +323,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
-export default DangKy;
+export default ChuDangKy;

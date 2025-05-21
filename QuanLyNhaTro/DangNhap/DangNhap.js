@@ -217,7 +217,7 @@ const DangNhap = ({ navigation }) => {
                     {/* Phần đăng ký */}
                     <View style={styles.registerContainer}>
                         <Text style={styles.registerText}>Bạn chưa có tài khoản? </Text>
-                        <TouchableOpacity onPress={() => navigation.navigate("DangKy")}>
+                        <TouchableOpacity onPress={() => navigation.navigate("ChonDangKy")}>
                             <Text style={styles.registerLinkText}>Tạo tài khoản</Text>
                         </TouchableOpacity>
                     </View>

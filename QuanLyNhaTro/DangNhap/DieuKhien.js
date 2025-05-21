@@ -1,8 +1,10 @@
 import { createStackNavigator } from "@react-navigation/stack";
 import DangNhap from "./DangNhap";
-import DangKy from "./DangKy";
+import KhachDangKy from "./KhachDangKy";
 import QuenMK from "./QuenMK";
 import Menu from "../Admin/Menu";
+import ChonDangKy from "./ChonDangKy";
+import ChuDangKy from "./ChuDangKy";
 
 const Stack = createStackNavigator();
 
@@ -15,7 +17,9 @@ const DieuKhien = () => {
             }}
         >
             <Stack.Screen name="DangNhap" component={DangNhap} />
-            <Stack.Screen name="DangKy" component={DangKy} />
+            <Stack.Screen name="ChonDangKy" component={ChonDangKy} />
+            <Stack.Screen name="KhachDangKy" component={KhachDangKy} />
+            <Stack.Screen name="ChuDangKy" component={ChuDangKy} />
             <Stack.Screen name="QuenMK" component={QuenMK} />
             <Stack.Screen name="Menu" component={Menu} />
         </Stack.Navigator>
