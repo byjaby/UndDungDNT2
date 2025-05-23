@@ -4,6 +4,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { useMyContextController } from "../../TrungTam";
 import DieuKhienHoSo from "./DieuKhienHoSo";
 import DieuKhienPhong from "./DieuKhienPhong";
+import DieuKhienDV from "./DieuKhienDV";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -13,13 +14,13 @@ const MenuChuTro = () => {
     return (
         <Tab.Navigator
             initialRouteName="DieuKhienPhong"
-            activeColor="#000814"
-            inactiveColor="#F2E8CF"
-            shifting={true} // Tab có hiệu ứng chuyển động mượt
+            activeColor="#F77F00"
+            inactiveColor="#F7E1D7"
+            shifting={true}
             barStyle={{
-                backgroundColor: "#EF476F",
+                backgroundColor: "#003049",
                 borderTopWidth: 1,
-                borderTopColor: "#BC4749",
+                borderTopColor: "#003049",
                 elevation: 10,
                 height: 65,
             }}
@@ -29,9 +30,20 @@ const MenuChuTro = () => {
                 name="DieuKhienPhong"
                 component={DieuKhienPhong}
                 options={{
-                    tabBarLabel: "Chủ trọ",
+                    tabBarLabel: "Quản lý phòng",
                     tabBarIcon: ({ color }) => (
-                        <Icon name="human-male-board" color={color} size={26} />
+                        <Icon name="bunk-bed" color={color} size={26} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="DieuKhienDV"
+                component={DieuKhienDV}
+                options={{
+                    tabBarLabel: "Quản lý dịch vụ",
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="bunk-bed" color={color} size={26} />
                     ),
                 }}
             />

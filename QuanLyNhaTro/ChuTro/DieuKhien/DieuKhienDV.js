@@ -1,34 +1,23 @@
-import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
-import { TouchableOpacity, Alert } from "react-native";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import { useMyContextController, dangXuat } from "../../TrungTam";
-import HoSo from "../ManHinh/HoSo";
-import { useNavigation } from "@react-navigation/native";
-import DoiMKChuTro from "../ManHinh/DoiMKChuTro";
-import SuaThongTinChuTro from "../ManHinh/SuaThongTinChuTro";
+import { useMyContextController } from "../../TrungTam";
+import DSDV from "../ManHinh/DSDV";
+import ThemDV from "../ManHinh/ThemDV";
+import ChiTietDV from "../ManHinh/ChiTietDV";
+import SuaDV from "../ManHinh/SuaDV";
 
 const Stack = createStackNavigator();
 
-const DieuKhienHoSo = () => {
-    const [controller, dispatch] = useMyContextController();
-    const navigation = useNavigation();
-
-    const handleLogout = () => {
-        dangXuat(dispatch, navigation);
-    };
-
+const DieuKhienDV = () => {
+    const [controller] = useMyContextController();
     const { userLogin } = controller;
+
     return (
-        <Stack.Navigator
-            initialRouteName="HoSo"
-
-        >
+        <Stack.Navigator initialRouteName="DSDV">
             <Stack.Screen
-                name="HoSo"
-                component={HoSo}
+                name="DSDV"
+                component={DSDV}
                 options={({ navigation }) => ({
-                    title: "THÔNG TIN CÁ NHÂN",
+                    title: "DỊCH VỤ",
                     headerTitleAlign: "center",
                     headerStyle: {
                         backgroundColor: "#FFD166",
@@ -48,48 +37,15 @@ const DieuKhienHoSo = () => {
                         textShadowColor: 'rgba(0, 0, 0, 0.3)',
                         textShadowOffset: { width: 1, height: 1 },
                         textShadowRadius: 2,
-                    },
-                    headerRight: () => (
-                        <TouchableOpacity onPress={handleLogout} style={{ marginRight: 16 }}>
-                            <Icon name="logout" size={24} color="#fff" />
-                        </TouchableOpacity>
-                    ),
-                })}
-            />
-            <Stack.Screen
-                name="SuaThongTinChuTro"
-                component={SuaThongTinChuTro}
-                options={() => ({
-                    title: "SỬA THÔNG TIN",
-                    headerTitleAlign: "center",
-                    headerStyle: {
-                        backgroundColor: "#FFD166",
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 4 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 5,
-                        elevation: 8,
-                        borderBottomWidth: 0,
-                    },
-                    headerTitleStyle: {
-                        color: "#F8F9FA",
-                        fontWeight: "bold",
-                        fontSize: 22,
-                        letterSpacing: 1,
-                        fontFamily: "HelveticaNeue-Medium",
-                        textShadowColor: 'rgba(0, 0, 0, 0.3)',
-                        textShadowOffset: { width: 1, height: 1 },
-                        textShadowRadius: 2,
-                    },
-
+                    }
                 })}
             />
 
             <Stack.Screen
-                name="DoiMKChuTro"
-                component={DoiMKChuTro}
-                options={() => ({
-                    title: "🔐 ĐỔI MẬT KHẨU",
+                name="ThemDV"
+                component={ThemDV}
+                options={({ navigation }) => ({
+                    title: "THÊM DỊCH VỤ",
                     headerTitleAlign: "center",
                     headerStyle: {
                         backgroundColor: "#FFD166",
@@ -109,13 +65,66 @@ const DieuKhienHoSo = () => {
                         textShadowColor: 'rgba(0, 0, 0, 0.3)',
                         textShadowOffset: { width: 1, height: 1 },
                         textShadowRadius: 2,
+                    }
+                })}
+            />
+            <Stack.Screen
+                name="ChiTietDV"
+                component={ChiTietDV}
+                options={({ navigation }) => ({
+                    title: "CHI TIẾT DỊCH VỤ",
+                    headerTitleAlign: "center",
+                    headerStyle: {
+                        backgroundColor: "#FFD166",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 5,
+                        elevation: 8,
+                        borderBottomWidth: 0,
                     },
-
+                    headerTitleStyle: {
+                        color: "#F8F9FA",
+                        fontWeight: "bold",
+                        fontSize: 22,
+                        letterSpacing: 1,
+                        fontFamily: "HelveticaNeue-Medium",
+                        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 2,
+                    }
                 })}
             />
 
+            <Stack.Screen
+                name="SuaDV"
+                component={SuaDV}
+                options={({ navigation }) => ({
+                    title: "CHỈNH SỬA DỊCH VỤ",
+                    headerTitleAlign: "center",
+                    headerStyle: {
+                        backgroundColor: "#FFD166",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 5,
+                        elevation: 8,
+                        borderBottomWidth: 0,
+                    },
+                    headerTitleStyle: {
+                        color: "#F8F9FA",
+                        fontWeight: "bold",
+                        fontSize: 22,
+                        letterSpacing: 1,
+                        fontFamily: "HelveticaNeue-Medium",
+                        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 2,
+                    }
+                })}
+            />
         </Stack.Navigator>
     );
 };
 
-export default DieuKhienHoSo;
+export default DieuKhienDV;

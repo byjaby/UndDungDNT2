@@ -27,16 +27,10 @@ const reducer = (state, action) => {
             return { ...state, khachThue: action.value };
         case "SET_PHONG":
             return { ...state, phong: action.value };
-        case "UPDATE_PHONG":
-            return { ...state, phong: action.payload };
         case "SET_DICHVU":
             return { ...state, dichVu: action.value };
-        case "UPDATE_DICHVU":
-            return { ...state, dichVu: action.payload };
         case "SET_TIENPHONG":
             return { ...state, tienPhong: action.value };
-        case "UPDATE_TIENPHONG":
-            return { ...state, tienPhong: action.payload };
         case "SET_LOADING":
             return { ...state, loading: action.value };
         case "SET_ERROR":
@@ -211,6 +205,7 @@ const chuDangKy = async (dispatch, fullName, email, password, phone, tenTro, add
             phone: phone.trim(),
             tenTro,
             address,
+            sLPhong: 0,
             id_loaiNguoiDung: idLoaiChuTro,
             createdAt: firestore.FieldValue.serverTimestamp(),
         });
@@ -412,6 +407,153 @@ const loadHoSo = async (dispatch, userId) => {
     }
 };
 
+const loadHoSoChuTro = async (dispatch, userId) => {
+    try {
+        const doc = await firestore().collection("ChuTro").doc(userId).get();
+
+        if (doc.exists) {
+            dispatch({
+                type: "SET_USER_LOGIN",
+                value: {
+                    user_id: doc.id,
+                    ...doc.data(),
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải lại thông tin cá nhân:", error);
+    }
+};
+
+const loadHoSoKhach = async (dispatch, userId) => {
+    try {
+        const doc = await firestore().collection("KhachThue").doc(userId).get();
+
+        if (doc.exists) {
+            dispatch({
+                type: "SET_USER_LOGIN",
+                value: {
+                    user_id: doc.id,
+                    ...doc.data(),
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải lại thông tin cá nhân:", error);
+    }
+};
+
+const loadDV = async (dispatch) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore().collection("DichVu").get();
+
+        const dSDV = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_DICHVU', value: dSDV });
+        dispatch({ type: 'SET_LOADING', value: false });
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu dịch vụ:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
+const themDV = async (dispatch, tenDV, chiPhi, moTa, creatorId) => {
+    dispatch({ type: "SET_LOADING", value: true });
+    try {
+        const snapshot = await firestore()
+            .collection("DichVu")
+            .where("tenDV", "==", tenDV.trim())
+            .where("creator", "==", creatorId.trim())
+            .get();
+
+        if (!snapshot.empty) {
+            throw new Error("Tên dịch vụ đã tồn tại.");
+        }
+        const uid = firestore().collection("DichVu").doc().id;
+        await firestore().collection("DichVu").doc(uid).set({
+            tenDV,
+            chiPhi,
+            moTa,
+            creator: creatorId,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: true, idDichVu: uid };
+    } catch (error) {
+        let message = "Thêm dịch vụ thất bại.";
+        console.error("Lỗi khi thêm dịch vụ:", error);
+        if (error.message) {
+            message = error.message;
+        }
+        dispatch({ type: "SET_ERROR", value: message });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: false, message };
+    }
+};
+
+const loadPhong = async (dispatch) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore().collection("Phong").get();
+
+        const dSPhong = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_PHONG', value: dSPhong });
+        dispatch({ type: 'SET_LOADING', value: false });
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu phòng:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
+const themPhong = async (dispatch, tenPhong, chieuDai, chieuRong, giaPhong, hinhAnh, nguoiThue, creatorId) => {
+    dispatch({ type: "SET_LOADING", value: true });
+    try {
+        const snapshot = await firestore()
+            .collection("Phong")
+            .where("tenPhong", "==", tenPhong.trim())
+            .where("creator", "==", creatorId.trim())
+            .get();
+
+        if (!snapshot.empty) {
+            throw new Error("Tên phòng đã tồn tại.");
+        }
+        const uid = firestore().collection("Phong").doc().id;
+        await firestore().collection("Phong").doc(uid).set({
+            tenPhong,
+            chieuDai,
+            chieuRong,
+            giaPhong,
+            hinhAnh,
+            nguoiThue: "",
+            creator: creatorId,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: true, idPhong: uid };
+    } catch (error) {
+        let message = "Thêm phòng mới thất bại.";
+        console.error("Lỗi khi thêm phòng:", error);
+        if (error.message) {
+            message = error.message;
+        }
+        dispatch({ type: "SET_ERROR", value: message });
+        dispatch({ type: "SET_LOADING", value: false });
+        return { success: false, message };
+    }
+};
+
 export {
     MyContextControllerProvider,
     useMyContextController,
@@ -423,5 +565,11 @@ export {
     themChuTro,
     loadKhachThue,
     themKhachThue,
-    loadHoSo
+    loadHoSo,
+    loadHoSoChuTro,
+    loadHoSoKhach,
+    loadDV,
+    themDV,
+    loadPhong,
+    themPhong
 };
