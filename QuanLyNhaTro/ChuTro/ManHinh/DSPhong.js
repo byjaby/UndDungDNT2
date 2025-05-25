@@ -10,8 +10,10 @@ const DSPhong = ({ navigation }) => {
     const { phong, userLogin } = controller;
     useFocusEffect(
         React.useCallback(() => {
-            loadPhong(dispatch);
-        }, [])
+            if (userLogin?.user_id) {
+                loadPhong(dispatch, userLogin.user_id);
+            }
+        }, [userLogin?.user_id])
     );
 
     const phongTheoUser = phong?.filter(
@@ -32,8 +34,8 @@ const DSPhong = ({ navigation }) => {
                     resizeMode="cover"
                 />
                 <View style={{ flex: 1, marginLeft: 12 }}>
-                    <Text style={styles.name}>{item.tenPhong}</Text>
-                    <Text style={styles.price}>{item.giaPhong?.toLocaleString()} đ</Text>
+                    <Text style={styles.name}>Phòng: <Text style={styles.name}>{item.tenPhong}</Text></Text>
+                    <Text style={styles.price}>Giá: <Text style={styles.price}>{item.giaPhong?.toLocaleString()} đ</Text></Text>
                 </View>
             </View>
         </TouchableOpacity>

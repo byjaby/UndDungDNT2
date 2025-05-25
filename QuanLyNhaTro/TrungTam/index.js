@@ -497,11 +497,14 @@ const themDV = async (dispatch, tenDV, chiPhi, moTa, creatorId) => {
     }
 };
 
-const loadPhong = async (dispatch) => {
+const loadPhong = async (dispatch, userId) => {
     dispatch({ type: 'SET_LOADING', value: true });
 
     try {
-        const snapshot = await firestore().collection("Phong").get();
+        const snapshot = await firestore()
+            .collection("Phong")
+            .where("creator", "==", userId)
+            .get();
 
         const dSPhong = snapshot.docs.map(doc => ({
             id: doc.id,
@@ -539,6 +542,10 @@ const themPhong = async (dispatch, tenPhong, chieuDai, chieuRong, giaPhong, hinh
             nguoiThue: "",
             creator: creatorId,
             createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+        const userRef = firestore().collection("ChuTro").doc(creatorId);
+        await userRef.update({
+            sLPhong: firestore.FieldValue.increment(1),
         });
         dispatch({ type: "SET_LOADING", value: false });
         return { success: true, idPhong: uid };
