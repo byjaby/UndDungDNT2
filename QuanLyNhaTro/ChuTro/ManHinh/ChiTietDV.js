@@ -9,7 +9,8 @@ const ChiTietDV = ({ route }) => {
     const [controller, dispatch] = useMyContextController();
     const navigation = useNavigation();
     const { dichVu } = route.params;
-
+    const isDefaultService =
+        ["điện", "nước"].includes((dichVu.tenDV || "").trim().toLowerCase());
     const handleDelete = () => {
         Alert.alert(
             "Xác nhận xóa",
@@ -71,14 +72,17 @@ const ChiTietDV = ({ route }) => {
                     Chỉnh sửa
                 </Button>
 
-                <Button
-                    mode="contained"
-                    icon="delete"
-                    onPress={handleDelete}
-                    style={[styles.button, { backgroundColor: "#f44336" }]}
-                >
-                    Xóa
-                </Button>
+                {!isDefaultService && (
+                    <Button
+                        mode="contained"
+                        icon="delete"
+                        onPress={handleDelete}
+                        style={[styles.button, { backgroundColor: "#f44336" }]}
+                    >
+                        Xóa
+                    </Button>
+                )}
+
             </View>
         </View>
     );

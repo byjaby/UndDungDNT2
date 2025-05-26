@@ -134,13 +134,14 @@ const dangNhap = async (dispatch, email, password) => {
     }
 };
 
-const KhachDangKy = async (dispatch, fullName, email, password, phone, address) => {
+const khachDangKy = async (dispatch, fullName, email, password, phone, address) => {
     dispatch({ type: "SET_LOADING", value: true });
 
     try {
         const phoneQuery = await KHACHTHUE.where("phone", "==", phone.trim()).get();
         if (!phoneQuery.empty) {
-            throw new Error("Số điện thoại đã được sử dụng.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Số điện thoại đã được sử dụng." };
         }
 
         const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
@@ -148,7 +149,8 @@ const KhachDangKy = async (dispatch, fullName, email, password, phone, address) 
 
         const loaiQuery = await LOAINGUOIDUNG.where("tenLoai", "==", "Khách thuê").get();
         if (loaiQuery.empty) {
-            throw new Error("Không tìm thấy loại người dùng 'Khách thuê'.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Không tìm thấy loại người dùng 'Khách thuê'." };
         }
         const idLoaiKhachThue = loaiQuery.docs[0].id;
 
@@ -187,7 +189,8 @@ const chuDangKy = async (dispatch, fullName, email, password, phone, tenTro, add
     try {
         const phoneQuery = await KHACHTHUE.where("phone", "==", phone.trim()).get();
         if (!phoneQuery.empty) {
-            throw new Error("Số điện thoại đã được sử dụng.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Số điện thoại đã được sử dụng." };
         }
 
         const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
@@ -195,7 +198,8 @@ const chuDangKy = async (dispatch, fullName, email, password, phone, tenTro, add
 
         const loaiQuery = await LOAINGUOIDUNG.where("tenLoai", "==", "Chủ trọ").get();
         if (loaiQuery.empty) {
-            throw new Error("Không tìm thấy loại người dùng 'Chủ trọ'.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Không tìm thấy loại người dùng 'Chủ trọ'." };
         }
         const idLoaiChuTro = loaiQuery.docs[0].id;
 
@@ -210,6 +214,33 @@ const chuDangKy = async (dispatch, fullName, email, password, phone, tenTro, add
             createdAt: firestore.FieldValue.serverTimestamp(),
         });
 
+        // Thêm 2 dịch vụ mặc định
+        const dichVuCollection = firestore().collection("DichVu");
+        const batch = firestore().batch();
+
+        const dvDienRef = dichVuCollection.doc();
+        batch.set(dvDienRef, {
+            tenDV: "Điện",
+            tenDVLower: "điện",
+            chiPhi: "",
+            moTa: "",
+            creator: uid,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+
+        const dvNuocRef = dichVuCollection.doc();
+        batch.set(dvNuocRef, {
+            tenDV: "Nước",
+            tenDVLower: "nước",
+            chiPhi: "",
+            moTa: "",
+            creator: uid,
+            createdAt: firestore.FieldValue.serverTimestamp(),
+        });
+
+        await batch.commit();
+
+        dispatch({ type: "SET_LOADING", value: false });
         return { success: true };
 
     } catch (error) {
@@ -272,7 +303,8 @@ const themChuTro = async (dispatch, fullName, email, password, phone, address, c
         // Kiểm tra phone đã tồn tại chưa
         const phoneQuery = await firestore().collection("ChuTro").where("phone", "==", phone.trim()).get();
         if (!phoneQuery.empty) {
-            throw new Error("Số điện thoại đã được sử dụng.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Số điện thoại đã được sử dụng." };
         }
 
         // Tạo tài khoản với email & password
@@ -282,7 +314,8 @@ const themChuTro = async (dispatch, fullName, email, password, phone, address, c
         // Lấy id loại người dùng "Chủ trọ"
         const loaiQuery = await firestore().collection("LoaiNguoiDung").where("tenLoai", "==", "Chủ trọ").get();
         if (loaiQuery.empty) {
-            throw new Error("Không tìm thấy loại người dùng 'Chủ trọ'.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Không tìm thấy loại người dùng 'Chủ trọ'." };
         }
         const idLoaiChuTro = loaiQuery.docs[0].id;
 
@@ -292,13 +325,40 @@ const themChuTro = async (dispatch, fullName, email, password, phone, address, c
             email: email.trim(),
             phone: phone.trim(),
             address,
+            tenTro: "",
+            sLPhong: "",
             id_loaiNguoiDung: idLoaiChuTro,
             creator: creatorId,
             createdAt: firestore.FieldValue.serverTimestamp(),
         });
 
-        dispatch({ type: "SET_LOADING", value: false });
+        // Thêm 2 dịch vụ mặc định: Điện và Nước
+        const dichVuCollection = firestore().collection("DichVu");
+        const batch = firestore().batch();
 
+        const dienRef = dichVuCollection.doc();
+        batch.set(dienRef, {
+            tenDV: "Điện",
+            tenDVLower: "điện",
+            chiPhi: "",
+            moTa: "",
+            creator: uid,
+            createdAt: firestore.FieldValue.serverTimestamp()
+        });
+
+        const nuocRef = dichVuCollection.doc();
+        batch.set(nuocRef, {
+            tenDV: "Nước",
+            tenDVLower: "nước",
+            chiPhi: "",
+            moTa: "",
+            creator: uid,
+            createdAt: firestore.FieldValue.serverTimestamp()
+        });
+
+        await batch.commit();
+
+        dispatch({ type: "SET_LOADING", value: false });
         return { success: true, idChuTro: uid };
 
     } catch (error) {
@@ -465,24 +525,32 @@ const loadDV = async (dispatch) => {
 
 const themDV = async (dispatch, tenDV, chiPhi, moTa, creatorId) => {
     dispatch({ type: "SET_LOADING", value: true });
+
+    const tenDVTrimmed = tenDV.trim();
+    const tenDVLower = tenDVTrimmed.toLowerCase();
+
     try {
         const snapshot = await firestore()
             .collection("DichVu")
-            .where("tenDV", "==", tenDV.trim())
+            .where("tenDVLower", "==", tenDVLower)
             .where("creator", "==", creatorId.trim())
             .get();
 
         if (!snapshot.empty) {
-            throw new Error("Tên dịch vụ đã tồn tại.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Tên dịch vụ đã tồn tại." };
         }
+
         const uid = firestore().collection("DichVu").doc().id;
         await firestore().collection("DichVu").doc(uid).set({
-            tenDV,
+            tenDV: tenDVTrimmed,
+            tenDVLower, // dùng để kiểm tra trùng tên
             chiPhi,
             moTa,
             creator: creatorId,
             createdAt: firestore.FieldValue.serverTimestamp(),
         });
+
         dispatch({ type: "SET_LOADING", value: false });
         return { success: true, idDichVu: uid };
     } catch (error) {
@@ -530,7 +598,8 @@ const themPhong = async (dispatch, tenPhong, chieuDai, chieuRong, giaPhong, hinh
             .get();
 
         if (!snapshot.empty) {
-            throw new Error("Tên phòng đã tồn tại.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Tên phòng đã tồn tại." };
         }
         const uid = firestore().collection("Phong").doc().id;
         await firestore().collection("Phong").doc(uid).set({
@@ -561,11 +630,34 @@ const themPhong = async (dispatch, tenPhong, chieuDai, chieuRong, giaPhong, hinh
     }
 };
 
+const loadTienPhong = async (dispatch, userId) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore()
+            .collection("TienPhong")
+            .where("creator", "==", userId)
+            .get();
+
+        const dSTienPhong = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_TIENPHONG', value: dSTienPhong });
+        dispatch({ type: 'SET_LOADING', value: false });
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu phòng:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
 export {
     MyContextControllerProvider,
     useMyContextController,
     dangNhap,
-    KhachDangKy,
+    khachDangKy,
     chuDangKy,
     dangXuat,
     loadChuTro,
@@ -578,5 +670,6 @@ export {
     loadDV,
     themDV,
     loadPhong,
-    themPhong
+    themPhong,
+    loadTienPhong
 };

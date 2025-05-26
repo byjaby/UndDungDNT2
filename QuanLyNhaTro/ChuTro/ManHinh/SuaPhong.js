@@ -7,11 +7,13 @@ import { launchImageLibrary } from "react-native-image-picker";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { Linking } from "react-native";
+import { useMyContextController } from "../../TrungTam";
 
 const SuaPhong = ({ route }) => {
     const navigation = useNavigation();
     const { phong } = route.params;
-
+    const [controller] = useMyContextController();
+    const { userLogin } = controller;
     const [tenPhong, setTenPhong] = useState(phong.tenPhong || "");
     const [giaPhong, setGiaPhong] = useState(phong.giaPhong?.toString() || "");
     const [chieuDai, setChieuDai] = useState(phong.chieuDai?.toString() || "");
@@ -84,6 +86,23 @@ const SuaPhong = ({ route }) => {
         }
 
         try {
+            // Lấy danh sách các phòng thuộc về người chủ hiện tại
+            const snapshot = await firestore()
+                .collection("Phong")
+                .where("creator", "==", userLogin.user_id)
+                .get();
+
+            const tenPhongMoi = tenPhong.trim().toLowerCase();
+
+            const tenTrung = snapshot.docs.find(
+                doc => doc.id !== phong.id && doc.data().tenPhong.trim().toLowerCase() === tenPhongMoi
+            );
+
+            if (tenTrung) {
+                Alert.alert("Lỗi", "Tên phòng đã tồn tại trong danh sách phòng của bạn.");
+                return;
+            }
+
             await firestore().collection("Phong").doc(phong.id).update({
                 tenPhong: tenPhong.trim(),
                 giaPhong: gia,
@@ -94,7 +113,8 @@ const SuaPhong = ({ route }) => {
             });
 
             Alert.alert("Thành công", "Phòng đã được cập nhật.");
-            navigation.navigate("DSPhong")
+            navigation.navigate("DSPhong");
+
         } catch (error) {
             console.log("Lỗi khi cập nhật:", error.message);
             Alert.alert("Lỗi", "Không thể cập nhật: " + error.message);

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import { IconButton, Text } from "react-native-paper";
+import { View, FlatList, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { Icon, IconButton, Text } from "react-native-paper";
 import { useMyContextController, loadPhong } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from "react-native";
@@ -37,7 +37,23 @@ const DSPhong = ({ navigation }) => {
                     <Text style={styles.name}>Phòng: <Text style={styles.name}>{item.tenPhong}</Text></Text>
                     <Text style={styles.price}>Giá: <Text style={styles.price}>{item.giaPhong?.toLocaleString()} đ</Text></Text>
                 </View>
+                <IconButton
+                    icon="calculator"
+                    iconColor="#fff"
+                    containerColor="#4CAF50"
+                    size={24}
+                    onPress={() => {
+                        if (item.nguoiThue && item.nguoiThue.trim() !== "") {
+                            navigation.navigate("TinhTien", { phong: item });
+                        } else {
+                            Alert.alert("Thông báo", "Phòng này chưa có người thuê, không thể tính tiền.");
+                        }
+                    }}
+                    style={styles.calcButton}
+                />
+
             </View>
+
         </TouchableOpacity>
     );
 
@@ -114,7 +130,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         backgroundColor: '#eee',
     },
-
+    payButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#4CAF50', // xanh lá
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+    },
+    payButtonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+        marginLeft: 6,
+    },
 });
 
 export default DSPhong;

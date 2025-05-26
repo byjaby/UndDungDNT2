@@ -12,8 +12,13 @@ const SuaDV = ({ route }) => {
     const [chiPhi, setChiPhi] = useState(dichVu.chiPhi?.toString() || "");
     const [moTa, setMoTa] = useState(dichVu.moTa || "");
 
+    const isDefaultService = ["điện", "nước"].includes(tenDV.trim().toLowerCase());
+
     const handleSave = async () => {
-        if (!tenDV.trim()) {
+        const tenDVTrimmed = tenDV.trim();
+        const tenDVLower = tenDVTrimmed.toLowerCase();
+
+        if (!tenDVTrimmed) {
             Alert.alert("Lỗi", "Vui lòng nhập tên dịch vụ.");
             return;
         }
@@ -25,8 +30,24 @@ const SuaDV = ({ route }) => {
         }
 
         try {
+            // Kiểm tra tên dịch vụ (không phân biệt hoa thường)
+            const snapshot = await firestore()
+                .collection("DichVu")
+                .where("tenDVLower", "==", tenDVLower)
+                .where("creator", "==", dichVu.creator)
+                .get();
+
+            const isDuplicate = snapshot.docs.some(doc => doc.id !== dichVu.id);
+
+            if (isDuplicate) {
+                Alert.alert("Lỗi", "Tên dịch vụ đã tồn tại.");
+                return;
+            }
+
+            // Cập nhật nếu không trùng
             await firestore().collection("DichVu").doc(dichVu.id).update({
-                tenDV: tenDV.trim(),
+                tenDV: tenDVTrimmed,
+                tenDVLower,
                 chiPhi: chiPhiValue,
                 moTa: moTa.trim(),
                 updatedAt: firestore.FieldValue.serverTimestamp()
@@ -48,6 +69,7 @@ const SuaDV = ({ route }) => {
                 onChangeText={setTenDV}
                 mode="outlined"
                 style={styles.input}
+                disabled={isDefaultService} // ✅ Không cho sửa
             />
 
             <TextInput

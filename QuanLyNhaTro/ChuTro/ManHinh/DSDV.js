@@ -51,7 +51,7 @@ const DSDV = ({ navigation }) => {
 
             {soLuongDV > 0 && (
                 <FlatList
-                    data={dichVu}
+                    data={dichVuTheoUser}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={renderItem}
                     contentContainerStyle={{ paddingBottom: 20 }}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, Alert, Image } from "react-native";
 import { Button } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
@@ -9,6 +9,29 @@ const ChiTietPhong = ({ route }) => {
     const [controller, dispatch] = useMyContextController();
     const navigation = useNavigation();
     const { phong } = route.params;
+
+    const [tenNguoiThue, setTenNguoiThue] = useState("");
+
+    useEffect(() => {
+        const fetchNguoiThue = async () => {
+            if (phong.nguoiThue && phong.nguoiThue.trim() !== "") {
+                try {
+                    const doc = await firestore().collection("KhachThue").doc(phong.nguoiThue).get();
+                    if (doc.exists) {
+                        const data = doc.data();
+                        setTenNguoiThue(data.fullName || "Không rõ");
+                    } else {
+                        setTenNguoiThue("Không tìm thấy");
+                    }
+                } catch (error) {
+                    console.error("Lỗi khi lấy tên người thuê:", error.message);
+                    setTenNguoiThue("Lỗi tải");
+                }
+            }
+        };
+
+        fetchNguoiThue();
+    }, [phong.nguoiThue]);
 
     const handleDelete = () => {
         if (phong.nguoiThue && phong.nguoiThue.trim() !== "") {
@@ -76,7 +99,9 @@ const ChiTietPhong = ({ route }) => {
 
             <View style={styles.row}>
                 <Text style={styles.label}>Người thuê:</Text>
-                <Text style={styles.value}>{phong.nguoiThue || "Chưa có"}</Text>
+                <Text style={styles.value}>
+                    {phong.nguoiThue ? tenNguoiThue : "Chưa có"}
+                </Text>
             </View>
 
             <View style={styles.row}>

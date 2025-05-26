@@ -5,6 +5,8 @@ import { useMyContextController } from "../../TrungTam";
 import DieuKhienHoSo from "./DieuKhienHoSo";
 import DieuKhienPhong from "./DieuKhienPhong";
 import DieuKhienDV from "./DieuKhienDV";
+import { IconButton } from "react-native-paper";
+import DieuKhienTinhTien from "./DieuKhienTinhTien";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -43,7 +45,17 @@ const MenuChuTro = () => {
                 options={{
                     tabBarLabel: "Quản lý dịch vụ",
                     tabBarIcon: ({ color }) => (
-                        <Icon name="bunk-bed" color={color} size={26} />
+                        <Icon name="calendar-edit" color={color} size={26} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="DieuKhienTinhTien"
+                component={DieuKhienTinhTien}
+                options={{
+                    tabBarLabel: "Quản lý tính tiền",
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="calculator" color={color} size={26} />
                     ),
                 }}
             />
