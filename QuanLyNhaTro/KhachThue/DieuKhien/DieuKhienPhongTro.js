@@ -24,11 +24,11 @@ const DieuKhienPhongTro = () => {
                 component={ThanhToan}
                 options={{ headerShown: true, title: "" }}
             />
-            <Stack.Screen
+            {/* <Stack.Screen
                 name="VNPayWebView"
                 component={VNPayWebView}
                 options={{ headerShown: true, title: "" }}
-            />
+            /> */}
         </Stack.Navigator>
     );
 };

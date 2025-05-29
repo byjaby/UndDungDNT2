@@ -1,15 +1,15 @@
 import React, { useEffect } from "react";
 import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
 import { IconButton, Text } from "react-native-paper";
-import { useMyContextController, loadDV } from "../../TrungTam";
+import { useMyContextController, loadLSGD } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 
-const DSDV = ({ navigation }) => {
+const GiaoDich = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
-    const { dichVu, userLogin } = controller;
+    const { userLogin } = controller;
     useFocusEffect(
         React.useCallback(() => {
-            loadDV(dispatch);
+            loadLSGD(dispatch, userLogin.user_id);
         }, [])
     );
 
@@ -35,7 +35,7 @@ const DSDV = ({ navigation }) => {
         <View style={{ flex: 1, padding: 10 }}>
             <View style={styles.header}>
                 <Text style={styles.title}>
-                    {soLuongDV > 0 ? `Danh sách dịch vụ (${soLuongDV}):` : "Chưa có dịch vụ nào."}
+                    {soLuongDV > 0 ? `Danh sách dịch vụ (${soLuongDV}):` : "Chưa có chủ trọ nào."}
                 </Text>
                 <IconButton
                     icon="plus"
@@ -100,4 +100,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default DSDV;
+export default GiaoDich;

@@ -31,6 +31,8 @@ const reducer = (state, action) => {
             return { ...state, tienPhong: action.value };
         case "SET_THUEPHONG":
             return { ...state, chuTro: action.value };
+        case "SET_LSGD":
+            return { ...state, chuTro: action.value };
         case "SET_LOADING":
             return { ...state, loading: action.value };
         case "SET_ERROR":
@@ -469,19 +471,31 @@ const loadHoSo = async (dispatch, userId) => {
 
 const loadHoSoChuTro = async (dispatch, userId) => {
     try {
-        const doc = await firestore().collection("ChuTro").doc(userId).get();
+        const userSnap = await firestore().collection("ChuTro").doc(userId).get();
+        const userData = userSnap.data();
 
-        if (doc.exists) {
-            dispatch({
-                type: "SET_USER_LOGIN",
-                value: {
-                    user_id: doc.id,
-                    ...doc.data(),
-                },
-            });
+        // Tìm thẻ ngân hàng của chủ trọ
+        const bankSnap = await firestore()
+            .collection("TheNganHang")
+            .where("creator", "==", userId)
+            .limit(1)
+            .get();
+
+        let bankData = null;
+        if (!bankSnap.empty) {
+            bankData = bankSnap.docs[0].data();
         }
+
+        dispatch({
+            type: "SET_USER_LOGIN",
+            value: {
+                ...userData,
+                user_id: userId,
+                ...bankData // Merge thông tin thẻ vào userLogin
+            }
+        });
     } catch (error) {
-        console.error("Lỗi khi tải lại thông tin cá nhân:", error);
+        console.error("Lỗi load hồ sơ:", error);
     }
 };
 
@@ -724,6 +738,51 @@ const loadTro = async (dispatch, userId) => {
     }
 };
 
+const loadLSGD = async (dispatch, userId) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        // Lấy tất cả LichSuGiaoDich
+        const snapshot = await firestore().collection("LichSuGiaoDich").get();
+
+        const lsgdDocs = snapshot.docs;
+
+        const filteredLSGD = [];
+
+        for (const doc of lsgdDocs) {
+            const data = doc.data();
+
+            // Chỉ xét nếu trạng thái là "true"
+            if (data.trangThai === "true" && data.tienPhongId) {
+                const tienPhongDoc = await firestore()
+                    .collection("TienPhong")
+                    .doc(data.tienPhongId)
+                    .get();
+
+                const tienPhongData = tienPhongDoc.data();
+
+                if (tienPhongData && tienPhongData.nguoiThueId === userId) {
+                    filteredLSGD.push({
+                        id: doc.id,
+                        ...data,
+                        tienPhong: {
+                            id: tienPhongDoc.id,
+                            ...tienPhongData
+                        }
+                    });
+                }
+            }
+        }
+
+        dispatch({ type: 'SET_LSGD', value: filteredLSGD });
+        dispatch({ type: 'SET_LOADING', value: false });
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu lịch sử giao dịch:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
 export {
     MyContextControllerProvider,
     useMyContextController,
@@ -746,4 +805,5 @@ export {
     loadTTCN,
     loadThuePhong,
     loadTro,
+    loadLSGD,
 };

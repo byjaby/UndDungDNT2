@@ -50,6 +50,25 @@ const DSPhong = ({ navigation }) => {
                         }
 
                         try {
+                            // 1. Kiểm tra thẻ ngân hàng
+                            const bankSnap = await firestore()
+                                .collection("TheNganHang")
+                                .where("creator", "==", userLogin.user_id)
+                                .limit(1)
+                                .get();
+
+                            if (bankSnap.empty) {
+                                Alert.alert("Thiếu thông tin", "Thông tin thẻ ngân hàng của bạn không đầy đủ. Vui lòng thêm đầy đủ thông tin trước khi tính tiền phòng!");
+                                return;
+                            }
+
+                            const bankData = bankSnap.docs[0].data();
+                            if (!bankData.tenNganHang || !bankData.hoTen || !bankData.soThe) {
+                                Alert.alert("Thiếu thông tin", "Thông tin thẻ ngân hàng của bạn không đầy đủ. Vui lòng thêm đầy đủ thông tin trước khi tính tiền phòng!");
+                                return;
+                            }
+
+                            // 2. Kiểm tra chi phí dịch vụ
                             const snapshot = await firestore()
                                 .collection("DichVu")
                                 .where("creator", "==", userLogin.user_id)
@@ -69,18 +88,17 @@ const DSPhong = ({ navigation }) => {
                                     "Thiếu chi phí dịch vụ",
                                     "Bạn cần nhập chi phí cho dịch vụ Điện và Nước trước khi tính tiền.",
                                     [
-
                                         { text: "Đóng", style: "cancel" }
                                     ]
                                 );
                                 return;
                             }
 
-                            // Nếu mọi thứ ok, đi đến trang tính tiền
+                            // 3. Nếu mọi thứ ok, đi đến trang tính tiền
                             navigation.navigate("TinhTien", { phong: item });
 
                         } catch (error) {
-                            Alert.alert("Lỗi", "Không thể kiểm tra dịch vụ: " + error.message);
+                            Alert.alert("Lỗi", "Không thể kiểm tra thông tin: " + error.message);
                         }
                     }}
 

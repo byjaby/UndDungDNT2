@@ -5,6 +5,7 @@ import { useMyContextController } from "../../TrungTam";
 import DieuKhienTrangChu from "./DieuKhienTrangChu";
 import DieuKhienHoSo from "./DieuKhienHoSo";
 import DieuKhienPhongTro from "./DieuKhienPhongTro";
+import DieuKhienGiaoDich from "./DieuKhienGiaoDich";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -64,6 +65,23 @@ const MenuKhachThue = () => {
                     tabBarIcon: ({ color, focused }) => (
                         <Icon
                             name={focused ? "home-account" : "home-account"}
+                            color={focused ? "#3498db" : color}
+                            size={focused ? 28 : 24}
+                        />
+                    ),
+                    tabBarColor: "#34495e",
+                    tabBarBadge: false,
+                }}
+            />
+
+            <Tab.Screen
+                name="DieuKhienGiaoDich"
+                component={DieuKhienGiaoDich}
+                options={{
+                    tabBarLabel: "Giao dịch",
+                    tabBarIcon: ({ color, focused }) => (
+                        <Icon
+                            name={focused ? "file-document-edit" : "file-document-edit-outline"}
                             color={focused ? "#3498db" : color}
                             size={focused ? 28 : 24}
                         />

@@ -198,22 +198,6 @@ const DangNhap = ({ navigation }) => {
                         <Text style={styles.orText}>Hoặc đăng nhập với</Text>
                         <View style={styles.divider} />
                     </View>
-
-                    <View style={styles.socialButtonsContainer}>
-                        <TouchableOpacity
-                            style={[styles.socialButton, { backgroundColor: '#DB4437' }]}
-                            android_ripple={{ color: 'rgba(255, 255, 255, 0.3)' }}
-                        >
-                            <MaterialCommunityIcons name="google" size={24} color="white" />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.socialButton, { backgroundColor: '#000000' }]}
-                            android_ripple={{ color: 'rgba(255, 255, 255, 0.3)' }}
-                        >
-                            <MaterialCommunityIcons name="cellphone" size={24} color="white" />
-                        </TouchableOpacity>
-                    </View>
-
                     {/* Phần đăng ký */}
                     <View style={styles.registerContainer}>
                         <Text style={styles.registerText}>Bạn chưa có tài khoản? </Text>
@@ -314,23 +298,6 @@ const styles = StyleSheet.create({
     orText: {
         paddingHorizontal: 10,
         fontSize: 16,
-    },
-    socialButtonsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    socialButton: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginHorizontal: 12,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
     },
     registerContainer: {
         flexDirection: 'row',

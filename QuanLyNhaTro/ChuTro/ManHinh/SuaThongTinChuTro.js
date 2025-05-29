@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, StyleSheet, Alert, ScrollView } from "react-native";
 import { TextInput, Button, Text } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
@@ -10,16 +10,41 @@ const SuaThongTinChuTro = ({ route }) => {
     const { user } = route.params;
     const [controller, dispatch] = useMyContextController();
     const { userLogin } = controller;
-    if (userLogin) {
-        console.log(userLogin.user_id);
-    } else {
-        console.log("Chưa có userLogin");
-    }
+
     const [fullName, setFullName] = useState(user.fullName || "");
     const [email, setEmail] = useState(user.email || "");
     const [phone, setPhone] = useState(user.phone || "");
     const [tenTro, setTenTro] = useState(user.tenTro || "");
     const [address, setAddress] = useState(user.address || "");
+    const [tenNganHang, setTenNganHang] = useState(user.tenNganHang || "");
+    const [hoTen, setHoTen] = useState(user.hoTen || "");
+    const [soThe, setSoThe] = useState(user.soThe || "");
+    const [bankDocId, setBankDocId] = useState(null);
+
+    useEffect(() => {
+        const fetchBankInfo = async () => {
+            try {
+                const snapshot = await firestore()
+                    .collection("TheNganHang")
+                    .where("creator", "==", userLogin.user_id)
+                    .limit(1)
+                    .get();
+
+                if (!snapshot.empty) {
+                    const doc = snapshot.docs[0];
+                    const data = doc.data();
+                    setBankDocId(doc.id);
+                    setTenNganHang(data.tenNganHang || "");
+                    setHoTen(data.hoTen || "");
+                    setSoThe(data.soThe || "");
+                }
+            } catch (error) {
+                console.error("Lỗi khi lấy thông tin ngân hàng:", error);
+            }
+        };
+
+        fetchBankInfo();
+    }, [userLogin.user_id]);
 
     const handleSave = async () => {
         if (!fullName.trim()) {
@@ -34,6 +59,20 @@ const SuaThongTinChuTro = ({ route }) => {
         }
 
         try {
+            if (soThe) {
+                const soTheSnapshot = await firestore()
+                    .collection("TheNganHang")
+                    .where("soThe", "==", soThe)
+                    .get();
+
+                const isDuplicate = soTheSnapshot.docs.some(doc => doc.id !== bankDocId);
+
+                if (isDuplicate) {
+                    Alert.alert("Lỗi", "Số thẻ này đã được sử dụng. Vui lòng nhập số khác.");
+                    return;
+                }
+            }
+            // Cập nhật thông tin chủ trọ
             await firestore().collection("ChuTro").doc(user.user_id).update({
                 fullName,
                 email,
@@ -41,6 +80,7 @@ const SuaThongTinChuTro = ({ route }) => {
                 tenTro,
                 address
             });
+
             dispatch({
                 type: "SET_USER_LOGIN",
                 value: {
@@ -52,7 +92,29 @@ const SuaThongTinChuTro = ({ route }) => {
                     address
                 }
             });
-            Alert.alert("Thành công", "Đã cập nhật thông tin cá nhân.");
+
+            // Thêm hoặc cập nhật thông tin ngân hàng
+            if (tenNganHang && hoTen && soThe) {
+                if (bankDocId) {
+                    // Cập nhật nếu đã tồn tại
+                    await firestore().collection("TheNganHang").doc(bankDocId).update({
+                        tenNganHang,
+                        hoTen,
+                        soThe
+                    });
+                } else {
+                    // Thêm mới
+                    await firestore().collection("TheNganHang").add({
+                        tenNganHang,
+                        hoTen,
+                        soThe,
+                        creator: userLogin.user_id,
+                        createdAt: firestore.FieldValue.serverTimestamp()
+                    });
+                }
+            }
+
+            Alert.alert("Thành công", "Đã cập nhật thông tin.");
             navigation.navigate("HoSo");
         } catch (error) {
             Alert.alert("Lỗi", "Không thể lưu: " + error.message);
@@ -86,14 +148,15 @@ const SuaThongTinChuTro = ({ route }) => {
                 keyboardType="phone-pad"
                 style={styles.input}
             />
+
             <TextInput
                 label="Tên trọ"
                 value={tenTro}
                 onChangeText={setTenTro}
                 mode="outlined"
-                keyboardType="phone-pad"
                 style={styles.input}
             />
+
             <TextInput
                 label="Địa chỉ"
                 value={address}
@@ -101,6 +164,31 @@ const SuaThongTinChuTro = ({ route }) => {
                 mode="outlined"
                 multiline
                 style={[styles.input, { height: 80 }]}
+            />
+
+            <Text style={styles.sectionTitle}>Thông tin ngân hàng</Text>
+
+            <TextInput
+                label="Tên ngân hàng"
+                value={tenNganHang}
+                onChangeText={setTenNganHang}
+                mode="outlined"
+                style={styles.input}
+            />
+            <TextInput
+                label="Họ tên chủ tài khoản"
+                value={hoTen}
+                onChangeText={setHoTen}
+                mode="outlined"
+                style={styles.input}
+            />
+            <TextInput
+                label="Số thẻ"
+                value={soThe}
+                onChangeText={setSoThe}
+                mode="outlined"
+                keyboardType="numeric"
+                style={styles.input}
             />
 
             <Button

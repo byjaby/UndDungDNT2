@@ -24,41 +24,59 @@ const HoSo = ({ navigation }) => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.row}>
-                <Text style={styles.label}>Họ tên:</Text>
-                <Text style={styles.value}>{userLogin.fullName || "Chưa có"}</Text>
+            <View>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Họ tên:</Text>
+                    <Text style={styles.value}>{userLogin.fullName || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Email:</Text>
+                    <Text style={styles.value}>{userLogin.email || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>SĐT:</Text>
+                    <Text style={styles.value}>{userLogin.phone || "Chưa có"}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Tên trọ:</Text>
+                    <Text style={styles.value}>{userLogin.tenTro || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Số lượng phòng:</Text>
+                    <Text style={styles.value}>{userLogin.sLPhong || "Chưa có"}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Địa chỉ:</Text>
+                    <Text style={styles.value}>{userLogin.address || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Ngày tạo:</Text>
+                    <Text style={styles.value}>
+                        {userLogin.createdAt
+                            ? new Date(userLogin.createdAt.seconds * 1000).toLocaleDateString()
+                            : "Không rõ"}
+                    </Text>
+                </View>
             </View>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{userLogin.email || "Chưa có"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>SĐT:</Text>
-                <Text style={styles.value}>{userLogin.phone || "Chưa có"}</Text>
-            </View>
-            <View style={styles.row}>
-                <Text style={styles.label}>Tên trọ:</Text>
-                <Text style={styles.value}>{userLogin.tenTro || "Chưa có"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Số lượng phòng:</Text>
-                <Text style={styles.value}>{userLogin.sLPhong || "Chưa có"}</Text>
-            </View>
-            <View style={styles.row}>
-                <Text style={styles.label}>Địa chỉ:</Text>
-                <Text style={styles.value}>{userLogin.address || "Chưa có"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Ngày tạo:</Text>
-                <Text style={styles.value}>
-                    {userLogin.createdAt
-                        ? new Date(userLogin.createdAt.seconds * 1000).toLocaleDateString()
-                        : "Không rõ"}
-                </Text>
+            <View>
+                <Text style={[styles.label, { marginBottom: 8 }]}>Thông tin thẻ ngân hàng</Text>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Ngân hàng:</Text>
+                    <Text style={styles.value}>{userLogin.tenNganHang || "Chưa có"}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Họ tên:</Text>
+                    <Text style={styles.value}>{userLogin.hoTen || "Chưa có"}</Text>
+                </View>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Số thẻ:</Text>
+                    <Text style={styles.value}>{userLogin.soThe || "Chưa có"}</Text>
+                </View>
             </View>
 
             <View style={styles.buttonContainer}>
@@ -81,6 +99,7 @@ const HoSo = ({ navigation }) => {
                 </Button>
             </View>
         </View>
+
     );
 };
 

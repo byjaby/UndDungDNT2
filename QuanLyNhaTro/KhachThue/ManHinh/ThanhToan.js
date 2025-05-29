@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -8,38 +8,78 @@ import {
     Alert,
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import firestore from "@react-native-firebase/firestore";
 
 const ThanhToan = () => {
     const route = useRoute();
     const { tienPhongData } = route.params || {};
     const navigation = useNavigation();
-    const handlePayment = async (method) => {
-        if (method === "VNPay") {
+    const [bankInfo, setBankInfo] = useState(null);
+
+    useEffect(() => {
+        const fetchBankInfo = async () => {
             try {
-                const response = await fetch('http://192.168.1.9:3000/api/create-vnpay-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        amount: tienPhongData.tongTien,
-                        description: `Thanh toán tiền phòng ${tienPhongData.tenPhong}`,
-                    }),
-                });
-                const result = await response.json();
-                console.log('👉 payment_url từ server:', result.payment_url);
-                if (result.payment_url) {
-                    navigation.navigate('VNPayWebView', {
-                        paymentUrl: result.payment_url,
-                    });
-                } else {
-                    Alert.alert('Lỗi', 'Không lấy được URL thanh toán từ server.');
+                const bankSnap = await firestore()
+                    .collection("TheNganHang")
+                    .where("creator", "==", tienPhongData.creator)
+                    .limit(1)
+                    .get();
+
+                if (!bankSnap.empty) {
+                    setBankInfo(bankSnap.docs[0].data());
                 }
             } catch (error) {
-                console.error(error);
-                Alert.alert('Lỗi', 'Không kết nối được tới máy chủ.');
+                console.log("Lỗi khi lấy thông tin ngân hàng:", error);
             }
-        } else {
-            Alert.alert("Thanh toán", `Bạn đã chọn thanh toán bằng ${method}`);
+        };
+
+        if (tienPhongData?.creator) {
+            fetchBankInfo();
         }
+    }, [tienPhongData]);
+
+    const handleConfirmPayment = () => {
+        Alert.alert(
+            "Xác nhận thanh toán",
+            "Bạn đã chuyển tiền cho chủ trọ chưa?",
+            [
+                {
+                    text: "Hủy",
+                    style: "cancel",
+                },
+                {
+                    text: "Xác nhận",
+                    onPress: async () => {
+                        try {
+                            // Tìm bản ghi LichSuGiaoDich theo tienPhongId
+                            const snapshot = await firestore()
+                                .collection("LichSuGiaoDich")
+                                .where("tienPhongId", "==", tienPhongData.id)
+                                .limit(1)
+                                .get();
+
+                            if (!snapshot.empty) {
+                                // Lấy docRef đầu tiên
+                                const docRef = snapshot.docs[0].ref;
+
+                                // Cập nhật trangThai và thoiGian
+                                await docRef.update({
+                                    trangThai: "true",
+                                    thoiGian: firestore.FieldValue.serverTimestamp(),
+                                });
+
+                                Alert.alert("Thành công", "Đã xác nhận thanh toán.");
+                                navigation.navigate("TrangChu");
+                            } else {
+                                Alert.alert("Lỗi", "Không tìm thấy lịch sử giao dịch để cập nhật.");
+                            }
+                        } catch (error) {
+                            Alert.alert("Lỗi", "Không thể cập nhật lịch sử giao dịch: " + error.message);
+                        }
+                    },
+                },
+            ]
+        );
     };
 
     if (!tienPhongData) {
@@ -64,39 +104,24 @@ const ThanhToan = () => {
                 </Text>
             </View>
 
-            <Text style={styles.paymentTitle}>Chọn phương thức thanh toán:</Text>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => handlePayment("VNPay")}
-            >
-                <Text style={styles.buttonText}>VNPay</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => handlePayment("NganHang")}
-            >
-                <Text style={styles.buttonText}>Ngân hàng</Text>
-            </TouchableOpacity>
+            {bankInfo ? (
+                <View style={styles.bankInfo}>
+                    <Text style={styles.paymentTitle}>Thông tin thẻ ngân hàng chủ trọ:</Text>
+                    <Text>Ngân hàng: {bankInfo.tenNganHang}</Text>
+                    <Text>Họ tên: {bankInfo.hoTen}</Text>
+                    <Text>Số thẻ: {bankInfo.soThe}</Text>
+                </View>
+            ) : (
+                <Text style={styles.warningText}>
+                    Không tìm thấy thông tin thẻ ngân hàng của chủ trọ.
+                </Text>
+            )}
 
             <TouchableOpacity
-                style={styles.button}
-                onPress={() => handlePayment("Momo")}
+                style={[styles.button, { backgroundColor: "#4CAF50" }]}
+                onPress={handleConfirmPayment}
             >
-                <Text style={styles.buttonText}>Momo</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => handlePayment("ZaloPay")}
-            >
-                <Text style={styles.buttonText}>ZaloPay</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => handlePayment("Visa")}
-            >
-                <Text style={styles.buttonText}>Visa / Mastercard</Text>
+                <Text style={styles.buttonText}>Xác nhận đã thanh toán</Text>
             </TouchableOpacity>
         </ScrollView>
     );
@@ -130,10 +155,9 @@ const styles = StyleSheet.create({
         marginVertical: 12,
     },
     button: {
-        backgroundColor: "#1976D2",
         padding: 12,
         borderRadius: 8,
-        marginBottom: 12,
+        marginTop: 20,
         alignItems: "center",
     },
     buttonText: {
@@ -145,6 +169,12 @@ const styles = StyleSheet.create({
         marginTop: 50,
         fontStyle: "italic",
         color: "#999",
+    },
+    bankInfo: {
+        backgroundColor: "#f0f0f0",
+        padding: 12,
+        borderRadius: 8,
+        marginTop: 10,
     },
 });
 

@@ -23,6 +23,7 @@ const Tro = ({ navigation }) => {
     const [dichVuList, setDichVuList] = useState([]);
     const [phong, setPhong] = useState([]);
     const [tienPhongList, setTienPhongList] = useState([]);
+    const [lichSuGiaoDichList, setLichSuGiaoDichList] = useState([]);
 
     const fetchTienPhong = async () => {
         try {
@@ -39,6 +40,23 @@ const Tro = ({ navigation }) => {
             setTienPhongList(data);
         } catch (error) {
             console.error("Lỗi khi load TienPhong:", error);
+        }
+    };
+
+    const fetchLichSuGiaoDich = async () => {
+        try {
+            const snapshot = await firestore()
+                .collection("LichSuGiaoDich")
+                .get();
+
+            const data = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+            }));
+
+            setLichSuGiaoDichList(data);
+        } catch (error) {
+            console.error("Lỗi khi load LichSuGiaoDich:", error);
         }
     };
 
@@ -93,10 +111,16 @@ const Tro = ({ navigation }) => {
 
             fetchTro();
             fetchTienPhong();
+            fetchLichSuGiaoDich();
         }, [userLogin?.user_id])
     );
 
     const renderRoomCard = ({ item }) => {
+        const daThanhToan = (tienPhongId) => {
+            return lichSuGiaoDichList.some(
+                ls => ls.tienPhongId === tienPhongId && ls.trangThai === "true"
+            );
+        };
         const tienPhong = tienPhongList.find(t => t.phongId === item.phongId);
         return (
             <View style={styles.roomCard} activeOpacity={0.8}>
@@ -141,12 +165,17 @@ const Tro = ({ navigation }) => {
                         <Text style={styles.totalAmount}>
                             Tổng tiền: {tienPhong.tongTien.toLocaleString()}đ
                         </Text>
-                        <TouchableOpacity
-                            style={styles.payButton}
-                            onPress={() => navigation.navigate("ThanhToan", { tienPhongData: tienPhong })}
-                        >
-                            <Text style={styles.payButtonText}>Thanh toán</Text>
-                        </TouchableOpacity>
+                        <Text style={{ marginTop: 4, fontWeight: "bold", color: daThanhToan(tienPhong.id) ? "green" : "orange" }}>
+                            Trạng thái: {daThanhToan(tienPhong.id) ? "Đã thanh toán" : "Chờ thanh toán"}
+                        </Text>
+                        {!daThanhToan(tienPhong.id) && (
+                            <TouchableOpacity
+                                style={styles.payButton}
+                                onPress={() => navigation.navigate("ThanhToan", { tienPhongData: tienPhong })}
+                            >
+                                <Text style={styles.payButtonText}>Thanh toán</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 ) : (
                     <View style={styles.billContainer}>

@@ -137,7 +137,6 @@ const TinhTien = ({ route }) => {
         try {
             const now = firestore.FieldValue.serverTimestamp();
 
-            // Ghi hoặc cập nhật tiền phòng trước
             let tienPhongId = "";
 
             const tienPhongQuery = await firestore()
@@ -204,7 +203,7 @@ const TinhTien = ({ route }) => {
             // Ghi lịch sử tính tiền
             await firestore().collection("LichSuTienPhong").add({
                 creator: userLogin.user_id,
-                tienPhongId, // <-- ID từ bảng TienPhong
+                tienPhongId,
                 phongId: phong.id,
                 tenPhong: phong.tenPhong,
                 giaPhong: phong.giaPhong,
@@ -220,6 +219,29 @@ const TinhTien = ({ route }) => {
                 idLichSuDien,
                 idLichSuNuoc,
             });
+
+            try {
+                const giaoDichSnap = await firestore()
+                    .collection("LichSuGiaoDich")
+                    .where("tienPhongId", "==", tienPhongId)
+                    .limit(1)
+                    .get();
+
+                if (!giaoDichSnap.empty) {
+                    // Nếu đã có, cập nhật lại trạng thái thành "false"
+                    const giaoDichRef = giaoDichSnap.docs[0].ref;
+                    await giaoDichRef.update({ trangThai: "false" });
+                } else {
+                    // Nếu chưa có, thêm mới
+                    await firestore().collection("LichSuGiaoDich").add({
+                        tienPhongId,
+                        trangThai: "false",
+                        thoiGian: firestore.FieldValue.serverTimestamp(),
+                    });
+                }
+            } catch (error) {
+                console.log("Lỗi khi xử lý LichSuGiaoDich:", error.message);
+            }
 
             Alert.alert("Thành công", `Tổng tiền: ${tong.toLocaleString()} đ`);
             navigation.goBack();
