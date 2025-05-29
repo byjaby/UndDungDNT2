@@ -1,21 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
     View,
     FlatList,
     StyleSheet,
     TouchableOpacity,
-    ScrollView
 } from "react-native";
-import { IconButton, Text } from "react-native-paper";
+import { Text } from "react-native-paper";
 import { useMyContextController, loadTienPhong } from "../../TrungTam";
 import { useFocusEffect } from "@react-navigation/native";
-import firestore from "@react-native-firebase/firestore";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const DSTinhTien = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
     const { tienPhong, userLogin } = controller;
-    const [danhSachDaXuLy, setDanhSachDaXuLy] = useState([]);
 
     useFocusEffect(
         React.useCallback(() => {
@@ -25,59 +22,9 @@ const DSTinhTien = ({ navigation }) => {
         }, [userLogin?.user_id])
     );
 
-    const tienPhongTheoUser = tienPhong?.filter(
+    const danhSachDaXuLy = (tienPhong || []).filter(
         (item) => item.creator === userLogin?.user_id
-    ) || [];
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const ketQua = await Promise.all(
-                tienPhongTheoUser.map(async (item) => {
-                    let tenNguoiThue = "Chưa có";
-                    let tenPhong = "Không rõ";
-
-                    try {
-                        if (item.nguoiThueId) {
-                            const nguoiThueDoc = await firestore()
-                                .collection("KhachThue")
-                                .doc(item.nguoiThueId)
-                                .get();
-                            if (nguoiThueDoc.exists) {
-                                tenNguoiThue =
-                                    nguoiThueDoc.data().fullName || "Không rõ";
-                            }
-                        }
-
-                        if (item.phongId) {
-                            const phongDoc = await firestore()
-                                .collection("Phong")
-                                .doc(item.phongId)
-                                .get();
-                            if (phongDoc.exists) {
-                                tenPhong = phongDoc.data().tenPhong || "Không rõ";
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Lỗi khi load dữ liệu:", error.message);
-                    }
-
-                    return {
-                        ...item,
-                        tenNguoiThue,
-                        tenPhong,
-                    };
-                })
-            );
-
-            setDanhSachDaXuLy(ketQua);
-        };
-
-        if (tienPhongTheoUser.length > 0) {
-            fetchData();
-        } else {
-            setDanhSachDaXuLy([]);
-        }
-    }, [tienPhongTheoUser]);
+    );
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
@@ -88,19 +35,21 @@ const DSTinhTien = ({ navigation }) => {
         >
             <View style={styles.cardHeader}>
                 <Icon name="home-city-outline" size={26} color="#3f51b5" />
-                <Text style={styles.cardTitle}>Phòng: {item.tenPhong}</Text>
+                <Text style={styles.cardTitle}>Phòng: {item.tenPhong || "Không rõ"}</Text>
             </View>
 
             <View style={styles.cardContent}>
                 <View style={styles.row}>
                     <Icon name="account" size={20} color="#555" />
                     <Text style={styles.label}>Người thuê:</Text>
-                    <Text style={styles.value}>{item.tenNguoiThue}</Text>
+                    <Text style={styles.value}>{item.tenNguoiThue || "Không rõ"}</Text>
                 </View>
                 <View style={styles.row}>
                     <Icon name="calendar-month-outline" size={20} color="#555" />
-                    <Text style={styles.label}>Tháng:</Text>
-                    <Text style={styles.value}>{item.createdAt.toDate().toLocaleDateString() || "Không rõ"}</Text>
+                    <Text style={styles.label}>Ngày:</Text>
+                    <Text style={styles.value}>
+                        {item.createdAt?.toDate?.().toLocaleDateString() || "Không rõ"}
+                    </Text>
                 </View>
                 <View style={styles.row}>
                     <Icon name="cash-multiple" size={20} color="#555" />
@@ -147,10 +96,6 @@ const styles = StyleSheet.create({
         fontSize: 22,
         fontWeight: "bold",
         color: "#333",
-    },
-    addButton: {
-        backgroundColor: "#3f51b5",
-        borderRadius: 30,
     },
     card: {
         backgroundColor: "#fff",

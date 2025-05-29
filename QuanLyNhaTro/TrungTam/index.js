@@ -2,16 +2,12 @@ import React, { createContext, useContext, useReducer } from "react";
 import auth from "@react-native-firebase/auth";
 import firestore from "@react-native-firebase/firestore";
 import { Alert } from "react-native";
+import DSPhong from "../ChuTro/ManHinh/DSPhong";
 
 const MyContext = createContext();
 const LOAINGUOIDUNG = firestore().collection("LoaiNguoiDung");
-const ADMIN = firestore().collection("Admin");
 const CHUTRO = firestore().collection("ChuTro");
 const KHACHTHUE = firestore().collection("KhachThue");
-const PHONG = firestore().collection("Phong");
-const DICHVU = firestore().collection("DichVu");
-const TIENPHONG = firestore().collection("TienPhong");
-const LICHSUTHANHTOAN = firestore().collection("LichSuThanhToan");
 
 const reducer = (state, action) => {
     switch (action.type) {
@@ -31,6 +27,10 @@ const reducer = (state, action) => {
             return { ...state, dichVu: action.value };
         case "SET_TIENPHONG":
             return { ...state, tienPhong: action.value };
+        case "SET_LSTIENPHONG":
+            return { ...state, tienPhong: action.value };
+        case "SET_THUEPHONG":
+            return { ...state, chuTro: action.value };
         case "SET_LOADING":
             return { ...state, loading: action.value };
         case "SET_ERROR":
@@ -647,9 +647,80 @@ const loadTienPhong = async (dispatch, userId) => {
         dispatch({ type: 'SET_TIENPHONG', value: dSTienPhong });
         dispatch({ type: 'SET_LOADING', value: false });
     } catch (error) {
+        console.error("Lỗi khi tải dữ liệu tiền phòng:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+    }
+};
+
+const loadTTCN = async (dispatch, userId) => {
+    try {
+        const doc = await firestore().collection("KhachThue").doc(userId).get();
+
+        if (doc.exists) {
+            dispatch({
+                type: "SET_USER_LOGIN",
+                value: {
+                    user_id: doc.id,
+                    ...doc.data(),
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải lại thông tin cá nhân:", error);
+    }
+};
+
+const loadThuePhong = async (dispatch, creator) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore()
+            .collection("ThuePhong")
+            .where("creator", "==", creator)
+            .get();
+
+        const danhThuePhong = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_THUEPHONG', value: danhThuePhong });
+        dispatch({ type: 'SET_LOADING', value: false });
+
+        return danhThuePhong;
+    } catch (error) {
+        console.error("Lỗi khi tải dữ liệu thuê phòng:", error);
+        dispatch({ type: 'SET_ERROR', value: error.message });
+        dispatch({ type: 'SET_LOADING', value: false });
+        return [];
+    }
+};
+
+const loadTro = async (dispatch, userId) => {
+    dispatch({ type: 'SET_LOADING', value: true });
+
+    try {
+        const snapshot = await firestore()
+            .collection("ThuePhong")
+            .where("userId", "==", userId)
+            .where("trangThai", "==", "true")
+            .get();
+
+        const dSPhong = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+
+        dispatch({ type: 'SET_PHONG', value: dSPhong });
+        dispatch({ type: 'SET_LOADING', value: false });
+
+        return dSPhong;
+    } catch (error) {
         console.error("Lỗi khi tải dữ liệu phòng:", error);
         dispatch({ type: 'SET_ERROR', value: error.message });
         dispatch({ type: 'SET_LOADING', value: false });
+        return [];
     }
 };
 
@@ -671,5 +742,8 @@ export {
     themDV,
     loadPhong,
     themPhong,
-    loadTienPhong
+    loadTienPhong,
+    loadTTCN,
+    loadThuePhong,
+    loadTro,
 };

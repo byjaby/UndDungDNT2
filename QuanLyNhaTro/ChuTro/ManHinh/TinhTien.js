@@ -137,25 +137,20 @@ const TinhTien = ({ route }) => {
         try {
             const now = firestore.FieldValue.serverTimestamp();
 
-            await firestore().collection("LichSuDien").add({
-                phongId: phong.id,
-                nguoiThueId: phong.nguoiThue,
-                chiSoCu: dienCu,
-                chiSoMoi: dMoi,
-                createdAt: now
-            });
+            // Ghi hoặc cập nhật tiền phòng trước
+            let tienPhongId = "";
 
-            await firestore().collection("LichSuNuoc").add({
-                phongId: phong.id,
-                nguoiThueId: phong.nguoiThue,
-                chiSoCu: nuocCu,
-                chiSoMoi: nMoi,
-                createdAt: now
-            });
+            const tienPhongQuery = await firestore()
+                .collection("TienPhong")
+                .where("creator", "==", userLogin.user_id)
+                .where("nguoiThueId", "==", phong.nguoiThue)
+                .where("phongId", "==", phong.id)
+                .get();
 
-            await firestore().collection("LichSuTienPhong").add({
+            const tienPhongData = {
                 creator: userLogin.user_id,
                 phongId: phong.id,
+                tenPhong: phong.tenPhong,
                 giaPhong: phong.giaPhong,
                 nguoiThueId: phong.nguoiThue,
                 tenNguoiThue,
@@ -165,47 +160,66 @@ const TinhTien = ({ route }) => {
                 chiSoNuocMoi: nMoi,
                 tienDichVu,
                 createdAt: now,
-                tongTien: tong
-            });
-
-            const tienPhongQuery = await firestore()
-                .collection("TienPhong")
-                .where("creator", "==", userLogin.user_id)
-                .where("nguoiThueId", "==", phong.nguoiThue)
-                .where("phongId", "==", phong.id)
-                .get();
+                tongTien: tong,
+                // idLichSuDien và idLichSuNuoc sẽ thêm sau
+            };
 
             if (!tienPhongQuery.empty) {
-                // Nếu tồn tại document, update
-                const docId = tienPhongQuery.docs[0].id;
-                await firestore().collection("TienPhong").doc(docId).update({
-                    giaPhong: phong.giaPhong,
-                    tenNguoiThue,
-                    chiSoDienCu: dienCu,
-                    chiSoDienMoi: dMoi,
-                    chiSoNuocCu: nuocCu,
-                    chiSoNuocMoi: nMoi,
-                    tienDichVu,
-                    createdAt: now,
-                    tongTien: tong
-                });
+                // Nếu đã có, cập nhật
+                const docRef = tienPhongQuery.docs[0].ref;
+                await docRef.update(tienPhongData);
+                tienPhongId = docRef.id;
             } else {
-                // Nếu chưa có, tạo mới
-                await firestore().collection("TienPhong").add({
-                    creator: userLogin.user_id,
-                    phongId: phong.id,
-                    giaPhong: phong.giaPhong,
-                    nguoiThueId: phong.nguoiThue,
-                    tenNguoiThue,
-                    chiSoDienCu: dienCu,
-                    chiSoDienMoi: dMoi,
-                    chiSoNuocCu: nuocCu,
-                    chiSoNuocMoi: nMoi,
-                    tienDichVu,
-                    createdAt: now,
-                    tongTien: tong
-                });
+                // Nếu chưa có, thêm mới
+                const docRef = await firestore().collection("TienPhong").add(tienPhongData);
+                tienPhongId = docRef.id;
             }
+
+            // Ghi lịch sử điện/nước
+            const refDien = await firestore().collection("LichSuDien").add({
+                phongId: phong.id,
+                nguoiThueId: phong.nguoiThue,
+                chiSoCu: dienCu,
+                chiSoMoi: dMoi,
+                createdAt: now
+            });
+
+            const refNuoc = await firestore().collection("LichSuNuoc").add({
+                phongId: phong.id,
+                nguoiThueId: phong.nguoiThue,
+                chiSoCu: nuocCu,
+                chiSoMoi: nMoi,
+                createdAt: now
+            });
+
+            const idLichSuDien = refDien.id;
+            const idLichSuNuoc = refNuoc.id;
+
+            // Cập nhật lại TienPhong với id lịch sử
+            await firestore().collection("TienPhong").doc(tienPhongId).update({
+                idLichSuDien,
+                idLichSuNuoc,
+            });
+
+            // Ghi lịch sử tính tiền
+            await firestore().collection("LichSuTienPhong").add({
+                creator: userLogin.user_id,
+                tienPhongId, // <-- ID từ bảng TienPhong
+                phongId: phong.id,
+                tenPhong: phong.tenPhong,
+                giaPhong: phong.giaPhong,
+                nguoiThueId: phong.nguoiThue,
+                tenNguoiThue,
+                chiSoDienCu: dienCu,
+                chiSoDienMoi: dMoi,
+                chiSoNuocCu: nuocCu,
+                chiSoNuocMoi: nMoi,
+                tienDichVu,
+                createdAt: now,
+                tongTien: tong,
+                idLichSuDien,
+                idLichSuNuoc,
+            });
 
             Alert.alert("Thành công", `Tổng tiền: ${tong.toLocaleString()} đ`);
             navigation.goBack();

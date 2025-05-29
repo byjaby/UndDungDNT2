@@ -98,6 +98,16 @@ const ChiTietChuTro = ({ route }) => {
             </View>
 
             <View style={styles.row}>
+                <Text style={styles.label}>Tên nhà trọ:</Text>
+                <Text style={styles.value}>{user.tenTro || "Chưa có"}</Text>
+            </View>
+
+            <View style={styles.row}>
+                <Text style={styles.label}>Số lượng phòng:</Text>
+                <Text style={styles.value}>{user.sLPhong || "Chưa có"}</Text>
+            </View>
+
+            <View style={styles.row}>
                 <Text style={styles.label}>Địa chỉ:</Text>
                 <Text style={styles.value}>{user.address || "Chưa có"}</Text>
             </View>

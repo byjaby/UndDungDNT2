@@ -6,6 +6,7 @@ import ChonDangKy from "./ChonDangKy";
 import ChuDangKy from "./ChuDangKy";
 import MenuAdmin from "../Admin/DieuKhien/MenuAdmin";
 import MenuChuTro from "../ChuTro/DieuKhien/MenuChuTro";
+import MenuKhachThue from "../KhachThue/DieuKhien/MenuKhachThue";
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ const DieuKhien = () => {
             <Stack.Screen name="QuenMK" component={QuenMK} />
             <Stack.Screen name="MenuAdmin" component={MenuAdmin} />
             <Stack.Screen name="MenuChuTro" component={MenuChuTro} />
+            <Stack.Screen name="MenuKhachThue" component={MenuKhachThue} />
         </Stack.Navigator>
     );
 };

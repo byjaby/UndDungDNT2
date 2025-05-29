@@ -7,6 +7,7 @@ import DieuKhienPhong from "./DieuKhienPhong";
 import DieuKhienDV from "./DieuKhienDV";
 import { IconButton } from "react-native-paper";
 import DieuKhienTinhTien from "./DieuKhienTinhTien";
+import DieuKhienThuePhong from "./DieuKhienThuePhong";
 
 const Tab = createMaterialBottomTabNavigator();
 
@@ -32,9 +33,20 @@ const MenuChuTro = () => {
                 name="DieuKhienPhong"
                 component={DieuKhienPhong}
                 options={{
-                    tabBarLabel: "Quản lý phòng",
+                    tabBarLabel: "Phòng",
                     tabBarIcon: ({ color }) => (
                         <Icon name="bunk-bed" color={color} size={26} />
+                    ),
+                }}
+            />
+
+            <Tab.Screen
+                name="DieuKhienThuePhong"
+                component={DieuKhienThuePhong}
+                options={{
+                    tabBarLabel: "Thuê phòng",
+                    tabBarIcon: ({ color }) => (
+                        <Icon name="account-plus" color={color} size={26} />
                     ),
                 }}
             />
@@ -43,17 +55,18 @@ const MenuChuTro = () => {
                 name="DieuKhienDV"
                 component={DieuKhienDV}
                 options={{
-                    tabBarLabel: "Quản lý dịch vụ",
+                    tabBarLabel: "Dịch vụ",
                     tabBarIcon: ({ color }) => (
                         <Icon name="calendar-edit" color={color} size={26} />
                     ),
                 }}
             />
+
             <Tab.Screen
                 name="DieuKhienTinhTien"
                 component={DieuKhienTinhTien}
                 options={{
-                    tabBarLabel: "Quản lý tính tiền",
+                    tabBarLabel: "Tính tiền",
                     tabBarIcon: ({ color }) => (
                         <Icon name="calculator" color={color} size={26} />
                     ),

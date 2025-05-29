@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, Alert } from "react-native";
 import { Button } from "react-native-paper";
-import { loadHoSoChuTro, useMyContextController } from "../../TrungTam";
+import { loadTTCN, useMyContextController } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 
 const HoSo = ({ navigation }) => {
@@ -18,7 +18,7 @@ const HoSo = ({ navigation }) => {
 
     useFocusEffect(
         React.useCallback(() => {
-            loadHoSoChuTro(dispatch, userLogin.user_id);
+            loadTTCN(dispatch, userLogin.user_id);
         }, [])
     );
 
@@ -38,15 +38,7 @@ const HoSo = ({ navigation }) => {
                 <Text style={styles.label}>SĐT:</Text>
                 <Text style={styles.value}>{userLogin.phone || "Chưa có"}</Text>
             </View>
-            <View style={styles.row}>
-                <Text style={styles.label}>Tên trọ:</Text>
-                <Text style={styles.value}>{userLogin.tenTro || "Chưa có"}</Text>
-            </View>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Số lượng phòng:</Text>
-                <Text style={styles.value}>{userLogin.sLPhong || "Chưa có"}</Text>
-            </View>
             <View style={styles.row}>
                 <Text style={styles.label}>Địa chỉ:</Text>
                 <Text style={styles.value}>{userLogin.address || "Chưa có"}</Text>
@@ -65,7 +57,7 @@ const HoSo = ({ navigation }) => {
                 <Button
                     mode="contained"
                     icon="pencil"
-                    onPress={() => navigation.navigate("SuaThongTinChuTro", { user: userLogin })}
+                    onPress={() => navigation.navigate("SuaThongTin", { user: userLogin })}
                     style={[styles.button, { backgroundColor: "#66E879" }]}
                 >
                     Chỉnh sửa
@@ -74,10 +66,19 @@ const HoSo = ({ navigation }) => {
                 <Button
                     mode="contained"
                     icon="lock-reset"
-                    onPress={() => navigation.navigate("DoiMKChuTro", { user: userLogin })}
+                    onPress={() => navigation.navigate("DoiMK", { user: userLogin })}
                     style={[styles.button, { backgroundColor: "#2196f3" }]}
                 >
                     Đổi mật khẩu
+                </Button>
+            </View>
+            <View style={styles.buttonContainer}>
+                <Button
+                    mode="contained"
+                    onPress={() => navigation.navigate("TroDK", { user: userLogin })}
+                    style={[{ backgroundColor: "#66E879" }]}
+                >
+                    Phòng trọ đã đăng ký
                 </Button>
             </View>
         </View>
@@ -106,12 +107,6 @@ const styles = StyleSheet.create({
         fontSize: 18,
         flex: 1,
         color: "#555",
-    },
-    image: {
-        width: 80,
-        height: 80,
-        borderRadius: 8,
-        backgroundColor: '#eee',
     },
     buttonContainer: {
         flexDirection: "row",

@@ -5,7 +5,7 @@ import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { useMyContextController } from "../../TrungTam";
 
-const SuaThongTinChuTro = ({ route }) => {
+const SuaThongTin = ({ route }) => {
     const navigation = useNavigation();
     const { user } = route.params;
     const [controller, dispatch] = useMyContextController();
@@ -61,6 +61,7 @@ const SuaThongTinChuTro = ({ route }) => {
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
+
             <TextInput
                 label="Họ tên"
                 value={fullName}
@@ -115,7 +116,7 @@ const SuaThongTinChuTro = ({ route }) => {
     );
 };
 
-export default SuaThongTinChuTro;
+export default SuaThongTin;
 
 const styles = StyleSheet.create({
     container: {

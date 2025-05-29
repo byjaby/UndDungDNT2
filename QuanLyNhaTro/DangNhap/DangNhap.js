@@ -75,13 +75,13 @@ const DangNhap = ({ navigation }) => {
                             if (tenLoai === "Admin") {
                                 navigation.reset({ index: 0, routes: [{ name: "MenuAdmin" }] });
                             } else if (tenLoai === "Khách thuê") {
-                                navigation.reset({ index: 0, routes: [{ name: "TrangChuKhachThue" }] });
+                                navigation.reset({ index: 0, routes: [{ name: "MenuKhachThue" }] });
                             } else if (tenLoai === "Chủ trọ") {
                                 navigation.reset({ index: 0, routes: [{ name: "MenuChuTro" }] });
                             } else {
                                 console.log("Loại người dùng không hợp lệ:", tenLoai);
                             }
-                        }, 1000); // Delay 1s
+                        }, 1000);
                     } else {
                         console.log("Không tìm thấy loại người dùng.");
                         setLoading(false);

@@ -13,7 +13,6 @@ const ADMIN = firestore().collection('Admin');
 const taoLoaiNguoiDungMacDinh = async () => {
     const loaiNguoiDungRef = await LOAINGUOIDUNG.get();
     if (loaiNguoiDungRef.empty) {
-        console.log('Chưa có bảng LoaiNguoiDung → Đang tạo mặc định...');
         await LOAINGUOIDUNG.doc("1").set({
             tenLoai: "Admin",
             moTa: "Quản trị viên hệ thống"
@@ -28,10 +27,6 @@ const taoLoaiNguoiDungMacDinh = async () => {
             tenLoai: "Chủ trọ",
             moTa: "Người quản lý/phát phòng"
         });
-
-        console.log('Đã tạo dữ liệu mẫu cho LoaiNguoiDung.');
-    } else {
-        console.log('LoaiNguoiDung đã tồn tại.');
     }
 };
 
@@ -39,15 +34,12 @@ const layIdLoaiAdmin = async () => {
     const querySnapshot = await LOAINGUOIDUNG.where('tenLoai', '==', 'Admin').get();
     if (!querySnapshot.empty) {
         const doc = querySnapshot.docs[0];
-        console.log('ID LoaiNguoiDung "Admin":', doc.id);
         return doc.id;
     } else {
-        // Nếu chưa có 'Admin', tạo mới
         const newDocRef = await LOAINGUOIDUNG.add({
             tenLoai: "Admin",
             moTa: "Quản trị viên hệ thống"
         });
-        console.log('Đã tạo loại Admin mới với ID:', newDocRef.id);
         return newDocRef.id;
     }
 };
@@ -60,11 +52,9 @@ const kiemTraVaTaoAdmin = async (idLoaiAdmin) => {
         const signInMethods = await auth().fetchSignInMethodsForEmail(adminEmail);
 
         if (signInMethods && signInMethods.length > 0) {
-            console.log('Admin đã tồn tại. Bỏ qua.');
             return;
         }
 
-        console.log('Đang tạo tài khoản Admin...');
         const userCredential = await auth().createUserWithEmailAndPassword(adminEmail, matKhau);
         const uid = userCredential.user.uid;
 
@@ -78,8 +68,6 @@ const kiemTraVaTaoAdmin = async (idLoaiAdmin) => {
         };
 
         await ADMIN.doc(uid).set(adminData);
-        console.log('Tài khoản Admin đã được tạo thành công.');
-
     } catch (err) {
         if (err.code === 'auth/email-already-in-use') {
             console.log('Địa chỉ email đã tồn tại. Bỏ qua.');

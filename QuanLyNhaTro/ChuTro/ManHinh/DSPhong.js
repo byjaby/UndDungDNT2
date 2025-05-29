@@ -4,6 +4,7 @@ import { Icon, IconButton, Text } from "react-native-paper";
 import { useMyContextController, loadPhong } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 import { Image } from "react-native";
+import firestore from "@react-native-firebase/firestore";
 
 const DSPhong = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
@@ -39,16 +40,50 @@ const DSPhong = ({ navigation }) => {
                 </View>
                 <IconButton
                     icon="calculator"
-                    iconColor="#fff"
-                    containerColor="#4CAF50"
+                    iconColor={item.nguoiThue && item.nguoiThue.trim() !== "" ? "#fff" : "#aaa"}
+                    containerColor={item.nguoiThue && item.nguoiThue.trim() !== "" ? "#4CAF50" : "#ccc"}
                     size={24}
-                    onPress={() => {
-                        if (item.nguoiThue && item.nguoiThue.trim() !== "") {
-                            navigation.navigate("TinhTien", { phong: item });
-                        } else {
+                    onPress={async () => {
+                        if (!item.nguoiThue || item.nguoiThue.trim() === "") {
                             Alert.alert("Thông báo", "Phòng này chưa có người thuê, không thể tính tiền.");
+                            return;
+                        }
+
+                        try {
+                            const snapshot = await firestore()
+                                .collection("DichVu")
+                                .where("creator", "==", userLogin.user_id)
+                                .get();
+
+                            let dien = null;
+                            let nuoc = null;
+
+                            snapshot.docs.forEach(doc => {
+                                const { tenDV, chiPhi } = doc.data();
+                                if (tenDV.toLowerCase() === "điện") dien = chiPhi;
+                                if (tenDV.toLowerCase() === "nước") nuoc = chiPhi;
+                            });
+
+                            if (!dien || !nuoc) {
+                                Alert.alert(
+                                    "Thiếu chi phí dịch vụ",
+                                    "Bạn cần nhập chi phí cho dịch vụ Điện và Nước trước khi tính tiền.",
+                                    [
+
+                                        { text: "Đóng", style: "cancel" }
+                                    ]
+                                );
+                                return;
+                            }
+
+                            // Nếu mọi thứ ok, đi đến trang tính tiền
+                            navigation.navigate("TinhTien", { phong: item });
+
+                        } catch (error) {
+                            Alert.alert("Lỗi", "Không thể kiểm tra dịch vụ: " + error.message);
                         }
                     }}
+
                     style={styles.calcButton}
                 />
 
