@@ -9,8 +9,11 @@ import {
 } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import firestore from "@react-native-firebase/firestore";
+import { useMyContextController } from "../../TrungTam";
 
 const ThanhToan = () => {
+    const [controller] = useMyContextController();
+    const { userLogin } = controller;
     const route = useRoute();
     const { tienPhongData } = route.params || {};
     const navigation = useNavigation();
@@ -59,14 +62,24 @@ const ThanhToan = () => {
                                 .get();
 
                             if (!snapshot.empty) {
-                                // Lấy docRef đầu tiên
-                                const docRef = snapshot.docs[0].ref;
+                                // Lấy document đầu tiên
+                                const doc = snapshot.docs[0];
+                                const docRef = doc.ref;
 
                                 // Cập nhật trangThai và thoiGian
                                 await docRef.update({
                                     trangThai: "true",
                                     thoiGian: firestore.FieldValue.serverTimestamp(),
                                 });
+
+                                // Thêm bản ghi vào LichSuThanhToan
+                                await firestore()
+                                    .collection("LichSuThanhToan")
+                                    .add({
+                                        giaoDichId: doc.id,
+                                        idNguoiThanhToan: userLogin.user_id,
+                                        ngayThanhToan: firestore.FieldValue.serverTimestamp(),
+                                    });
 
                                 Alert.alert("Thành công", "Đã xác nhận thanh toán.");
                                 navigation.navigate("TrangChu");
@@ -76,7 +89,7 @@ const ThanhToan = () => {
                         } catch (error) {
                             Alert.alert("Lỗi", "Không thể cập nhật lịch sử giao dịch: " + error.message);
                         }
-                    },
+                    }
                 },
             ]
         );
@@ -110,6 +123,7 @@ const ThanhToan = () => {
                     <Text>Ngân hàng: {bankInfo.tenNganHang}</Text>
                     <Text>Họ tên: {bankInfo.hoTen}</Text>
                     <Text>Số thẻ: {bankInfo.soThe}</Text>
+                    <Text style={styles.totalAmount}>Hướng dẫn: Người dùng chuyển khoản vào tài khoản chủ trọ rồi sau đó bấm "Xác nhận đã thanh toán".</Text>
                 </View>
             ) : (
                 <Text style={styles.warningText}>
@@ -148,6 +162,7 @@ const styles = StyleSheet.create({
         color: "green",
         fontSize: 16,
         marginTop: 8,
+        textAlign: "justify"
     },
     paymentTitle: {
         fontSize: 18,

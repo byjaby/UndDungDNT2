@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert } from "react-native";
-import { TextInput, Button, Text } from "react-native-paper";
+import { View, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
+import { TextInput, Button, Text, Appbar } from "react-native-paper";
 import { themKhachThue, useMyContextController } from "../../TrungTam";
 
 const ThemKhachThue = ({ navigation }) => {
     const [controller, dispatch] = useMyContextController();
     const { userLogin } = controller;
-    if (userLogin) {
-        console.log(userLogin.user_id);
-    } else {
-        console.log("Chưa có userLogin");
-    }
+
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
@@ -22,13 +18,10 @@ const ThemKhachThue = ({ navigation }) => {
             Alert.alert("Lỗi", "Vui lòng nhập đầy đủ thông tin.");
             return;
         }
-        // Kiểm tra độ dài mật khẩu
         if (password.length < 6) {
             Alert.alert("Lỗi", "Mật khẩu phải có ít nhất 6 ký tự.");
             return;
         }
-
-        // Kiểm tra số điện thoại phải có đúng 10 chữ số
         const phoneRegex = /^\d{10}$/;
         if (!phoneRegex.test(phone)) {
             Alert.alert("Lỗi", "Số điện thoại phải đủ 10 chữ số.");
@@ -45,71 +38,95 @@ const ThemKhachThue = ({ navigation }) => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Thêm khách thuê mới</Text>
-            <TextInput
-                label="Họ và tên"
-                value={fullName}
-                onChangeText={setFullName}
-                mode="outlined"
-                style={styles.input}
-            />
-            <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                mode="outlined"
-                style={styles.input}
-            />
-            <TextInput
-                label="Mật khẩu"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                mode="outlined"
-                style={styles.input}
-            />
-            <TextInput
-                label="Số điện thoại"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                mode="outlined"
-                style={styles.input}
-            />
-            <TextInput
-                label="Địa chỉ"
-                value={address}
-                onChangeText={setAddress}
-                mode="outlined"
-                style={styles.input}
-            />
-            <Button
-                mode="contained"
-                style={{ marginTop: 20, width: 100, alignSelf: 'center', backgroundColor: '#343A40', fontWeight: 'bold' }}
-                onPress={handleAddChuTro}
+        <>
+            <Appbar.Header style={{ backgroundColor: "#343A40" }}>
+                <Appbar.BackAction onPress={() => navigation.goBack()} color="#fff" />
+                <Appbar.Content title="Thêm khách thuê mới" titleStyle={{ color: "#fff" }} />
+            </Appbar.Header>
+
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : null}
+                style={{ flex: 1 }}
             >
-                Thêm
-            </Button>
-        </View>
+                <ScrollView contentContainerStyle={styles.container}>
+                    <TextInput
+                        label="Họ và tên"
+                        value={fullName}
+                        onChangeText={setFullName}
+                        mode="outlined"
+                        style={styles.input}
+                        autoComplete="name"
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        keyboardType="email-address"
+                        mode="outlined"
+                        style={styles.input}
+                        autoComplete="email"
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Mật khẩu"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        mode="outlined"
+                        style={styles.input}
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Số điện thoại"
+                        value={phone}
+                        onChangeText={setPhone}
+                        keyboardType="phone-pad"
+                        mode="outlined"
+                        style={styles.input}
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Địa chỉ"
+                        value={address}
+                        onChangeText={setAddress}
+                        mode="outlined"
+                        style={styles.input}
+                        returnKeyType="done"
+                    />
+
+                    <Button
+                        mode="contained"
+                        onPress={handleAddChuTro}
+                        style={styles.button}
+                        contentStyle={{ paddingVertical: 8 }}
+                    >
+                        Thêm
+                    </Button>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16,
-        flex: 1,
+        padding: 24,
+        paddingTop: 32,
         backgroundColor: "#fff",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        textAlign: "center",
+        flexGrow: 1,
     },
     input: {
-        marginBottom: 16,
+        marginBottom: 20,
+        backgroundColor: "#fff",
+    },
+    button: {
+        marginTop: 12,
+        backgroundColor: "#343A40",
+        borderRadius: 25,
+        alignSelf: "center",
+        width: "50%",
+        elevation: 2,
     },
 });
 

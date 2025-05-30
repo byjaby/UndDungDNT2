@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
-import { Button } from "react-native-paper";
+import { View, Text, StyleSheet, Alert, ScrollView, StatusBar } from "react-native";
+import { Button, Card, Avatar, Divider } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from "../../TrungTam";
 import auth from "@react-native-firebase/auth";
+import LinearGradient from 'react-native-linear-gradient';
 
 const ChiTietChuTro = ({ route }) => {
     const [controller, dispatch] = useMyContextController();
@@ -13,7 +14,7 @@ const ChiTietChuTro = ({ route }) => {
 
     const [creatorName, setCreatorName] = React.useState("Đang tải...");
     console.log("ID người tạo (creator):", user.creator);
-    console.log("user.id: ", user.id); // Kiểm tra giá trị
+    console.log("user.id: ", user.id);
 
     const deleteUser = async () => {
         try {
@@ -78,83 +79,136 @@ const ChiTietChuTro = ({ route }) => {
         fetchCreatorName();
     }, [user.creator]);
 
+    const InfoRow = ({ icon, label, value }) => (
+        <View style={styles.infoRow}>
+            <View style={styles.iconContainer}>
+                <Text style={styles.icon}>{icon}</Text>
+            </View>
+            <View style={styles.infoContent}>
+                <Text style={styles.label}>{label}</Text>
+                <Text style={styles.value}>{value || "Chưa có"}</Text>
+            </View>
+        </View>
+    );
+
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Chi tiết chủ trọ</Text>
+        <>
+            <StatusBar barStyle="light-content" backgroundColor="#1a1a2e" />
+            <LinearGradient
+                colors={['#CCD5AE', '#E9EDC9', '#FEFAE0']}
+                style={styles.container}
+            >
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {/* Header Section */}
+                    <View style={styles.header}>
+                        <Avatar.Text
+                            size={80}
+                            label={user.fullName ? user.fullName.charAt(0).toUpperCase() : "U"}
+                            style={styles.avatar}
+                            labelStyle={styles.avatarLabel}
+                        />
+                        <Text style={styles.title}>Chi tiết chủ trọ</Text>
+                        <Text style={styles.subtitle}>{user.fullName || "Người dùng"}</Text>
+                    </View>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Họ tên:</Text>
-                <Text style={styles.value}>{user.fullName || "Chưa có"}</Text>
-            </View>
+                    {/* Info Card */}
+                    <Card style={styles.infoCard}>
+                        <Card.Content style={styles.cardContent}>
+                            <InfoRow
+                                icon="👤"
+                                label="Họ tên"
+                                value={user.fullName}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{user.email || "Chưa có"}</Text>
-            </View>
+                            <InfoRow
+                                icon="📧"
+                                label="Email"
+                                value={user.email}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>SĐT:</Text>
-                <Text style={styles.value}>{user.phone || "Chưa có"}</Text>
-            </View>
+                            <InfoRow
+                                icon="📱"
+                                label="Số điện thoại"
+                                value={user.phone}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Tên nhà trọ:</Text>
-                <Text style={styles.value}>{user.tenTro || "Chưa có"}</Text>
-            </View>
+                            <InfoRow
+                                icon="🏠"
+                                label="Tên nhà trọ"
+                                value={user.tenTro}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Số lượng phòng:</Text>
-                <Text style={styles.value}>{user.sLPhong || "Chưa có"}</Text>
-            </View>
+                            <InfoRow
+                                icon="🚪"
+                                label="Số lượng phòng"
+                                value={user.sLPhong}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Địa chỉ:</Text>
-                <Text style={styles.value}>{user.address || "Chưa có"}</Text>
-            </View>
+                            <InfoRow
+                                icon="📍"
+                                label="Địa chỉ"
+                                value={user.address}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Người tạo:</Text>
-                <Text style={styles.value}>{creatorName || "Chưa có"}</Text>
-            </View>
+                            <InfoRow
+                                icon="👨‍💼"
+                                label="Người tạo"
+                                value={creatorName}
+                            />
+                            <Divider style={styles.divider} />
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Ngày tạo:</Text>
-                <Text style={styles.value}>
-                    {user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : "Không rõ"}
-                </Text>
-            </View>
-            <View style={styles.buttonContainer}>
-                <Button
-                    mode="contained"
-                    icon="pencil"
-                    onPress={() => navigation.navigate("SuaChuTro", { user })}
-                    style={[styles.button, { backgroundColor: "#66E879" }]}
-                >
-                    Chỉnh sửa
-                </Button>
+                            <InfoRow
+                                icon="📅"
+                                label="Ngày tạo"
+                                value={user.createdAt ? new Date(user.createdAt.seconds * 1000).toLocaleDateString() : "Không rõ"}
+                            />
+                        </Card.Content>
+                    </Card>
 
-                <Button
-                    mode="contained"
-                    icon="delete"
-                    onPress={handleDelete}
-                    style={[styles.button, { backgroundColor: "#f44336" }]}
-                >
-                    Xóa
-                </Button>
-            </View>
-            <View style={styles.buttonContainer}>
+                    {/* Action Buttons */}
+                    <View style={styles.actionContainer}>
+                        <Button
+                            mode="contained"
+                            icon="pencil"
+                            onPress={() => navigation.navigate("SuaChuTro", { user })}
+                            style={styles.editButton}
+                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Chỉnh sửa
+                        </Button>
 
-                <Button
-                    mode="contained"
-                    icon="lock-reset"
-                    onPress={resetPassword}
-                    style={[styles.button, { backgroundColor: "#2196f3" }]}
-                >
-                    Đặt lại mật khẩu
-                </Button>
+                        <Button
+                            mode="contained"
+                            icon="lock-reset"
+                            onPress={resetPassword}
+                            style={styles.resetButton}
+                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Đặt lại mật khẩu
+                        </Button>
 
-            </View>
-        </View >
+                        <Button
+                            mode="contained"
+                            icon="delete"
+                            onPress={handleDelete}
+                            style={styles.deleteButton}
+                            contentStyle={styles.buttonContent}
+                            labelStyle={styles.buttonLabel}
+                        >
+                            Xóa
+                        </Button>
+                    </View>
+                </ScrollView>
+            </LinearGradient>
+        </>
     );
 };
 
@@ -163,37 +217,126 @@ export default ChiTietChuTro;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        backgroundColor: "#fff",
+    },
+    header: {
+        alignItems: 'center',
+        paddingTop: 30,
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+    },
+    avatar: {
+        backgroundColor: '#4CAF50',
+        marginBottom: 15,
+        elevation: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    avatarLabel: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#fff',
     },
     title: {
-        alignSelf: 'center',
-        fontSize: 26,
+        fontSize: 28,
         fontWeight: "bold",
-        marginBottom: 20,
-        color: "#3f51b5",
+        color: "#344E41",
+        marginBottom: 5,
+        textAlign: 'center',
     },
-    row: {
-        flexDirection: "row",
-        marginBottom: 12,
+    subtitle: {
+        fontSize: 16,
+        color: "#344E41",
+        textAlign: 'center',
+    },
+    infoCard: {
+        margin: 20,
+        borderRadius: 20,
+        elevation: 12,
+        backgroundColor: '#ffffff',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.3,
+        shadowRadius: 12,
+    },
+    cardContent: {
+        padding: 20,
+    },
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 15,
+    },
+    iconContainer: {
+        width: 45,
+        height: 45,
+        borderRadius: 22.5,
+        backgroundColor: '#f0f4f8',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    icon: {
+        fontSize: 20,
+    },
+    infoContent: {
+        flex: 1,
     },
     label: {
-        fontWeight: "bold",
-        fontSize: 18,
-        width: 110,
-        color: "#333",
+        fontSize: 14,
+        color: "#666",
+        marginBottom: 2,
+        fontWeight: '500',
     },
     value: {
-        fontSize: 18,
-        flex: 1,
-        color: "#555",
+        fontSize: 16,
+        color: "#2c3e50",
+        fontWeight: '600',
     },
-    buttonContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        marginTop: 15,
+    divider: {
+        backgroundColor: '#C9ADA7',
+        height: 1,
+        marginVertical: 5,
     },
-    button: {
-        paddingHorizontal: 16,
+    actionContainer: {
+        paddingHorizontal: 20,
+        paddingBottom: 30,
+        gap: 15,
+    },
+    editButton: {
+        backgroundColor: '#4CAF50',
+        borderRadius: 15,
+        elevation: 6,
+        shadowColor: '#4CAF50',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    resetButton: {
+        backgroundColor: '#2196F3',
+        borderRadius: 15,
+        elevation: 6,
+        shadowColor: '#2196F3',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    deleteButton: {
+        backgroundColor: '#f44336',
+        borderRadius: 15,
+        elevation: 6,
+        shadowColor: '#f44336',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+    },
+    buttonContent: {
+        paddingVertical: 8,
+    },
+    buttonLabel: {
+        fontSize: 16,
+        fontWeight: '600',
+        letterSpacing: 0.5,
     },
 });

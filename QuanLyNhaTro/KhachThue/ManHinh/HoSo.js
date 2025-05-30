@@ -81,6 +81,15 @@ const HoSo = ({ navigation }) => {
                     Phòng trọ đã đăng ký
                 </Button>
             </View>
+            <View style={styles.buttonContainer}>
+                <Button
+                    mode="contained"
+                    onPress={() => navigation.navigate("TroThue", { user: userLogin })}
+                    style={[{ backgroundColor: "#66E879" }]}
+                >
+                    Phòng trọ đã thuê
+                </Button>
+            </View>
         </View>
     );
 };

@@ -1,102 +1,147 @@
-import React, { useEffect } from "react";
-import { View, FlatList, StyleSheet, TouchableOpacity } from "react-native";
-import { IconButton, Text } from "react-native-paper";
-import { useMyContextController, loadLSGD } from "../../TrungTam";
+import React, { useCallback, useState } from "react";
+import { View, FlatList, StyleSheet } from "react-native";
+import { Text, Button } from "react-native-paper";
+import { Picker } from "@react-native-picker/picker";
+import { useMyContextController, loadLSTT } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
 
-const GiaoDich = ({ navigation }) => {
+const GiaoDich = () => {
     const [controller, dispatch] = useMyContextController();
-    const { userLogin } = controller;
+    const { userLogin, LSGD = [] } = controller;
+
+    const [selectedMonth, setSelectedMonth] = useState(0); // 0 = Tất cả tháng
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
     useFocusEffect(
-        React.useCallback(() => {
-            loadLSGD(dispatch, userLogin.user_id);
+        useCallback(() => {
+            loadLSTT(dispatch, userLogin.user_id);
         }, [])
     );
 
-    const dichVuTheoUser = dichVu?.filter(
-        (dv) => dv.creator === userLogin?.user_id
-    ) || [];
+    const filteredLSGD = LSGD.filter((item) => {
+        const date = item.ngayThanhToan instanceof Date
+            ? item.ngayThanhToan
+            : item.ngayThanhToan?.toDate?.();
 
-    const soLuongDV = dichVuTheoUser.length;
+        return (
+            date &&
+            (selectedMonth === 0 || date.getMonth() + 1 === selectedMonth) &&
+            date.getFullYear() === selectedYear
+        );
+    });
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.card}
-            onPress={() => navigation.navigate("ChiTietDV", { dichVu: item })}
-        >
-            <View style={styles.rowBetween}>
-                <Text style={styles.name}>{item.tenDV}</Text>
-                <Text style={styles.price}>{item.chiPhi?.toLocaleString()} đ</Text>
+    const renderItem = ({ item }) => {
+        const formattedDate = item.ngayThanhToan?.toDate().toLocaleDateString("vi-VN") || "Không rõ";
+        return (
+            <View style={styles.card}>
+                <Text style={styles.title}>Tên trọ: {item.tenTro}</Text>
+                <Text>Chủ trọ: {item.tenChuTro}</Text>
+                <Text>Phòng: {item.tenPhong}</Text>
+                <Text>Tổng tiền: {item.tongTien.toLocaleString()} đ</Text>
+                <Text>Ngày giao dịch: {formattedDate}</Text>
             </View>
-        </TouchableOpacity>
-    );
+        );
+    };
+
+    const yearList = [];
+    for (let y = new Date().getFullYear(); y >= 2020; y--) {
+        yearList.push(y);
+    }
+
+    const getTitle = () => {
+        let title = `Lịch sử giao dịch (${filteredLSGD.length})`;
+        if (selectedMonth > 0) title += ` - Tháng ${selectedMonth}`;
+        title += `/${selectedYear}`;
+        return title;
+    };
 
     return (
-        <View style={{ flex: 1, padding: 10 }}>
-            <View style={styles.header}>
-                <Text style={styles.title}>
-                    {soLuongDV > 0 ? `Danh sách dịch vụ (${soLuongDV}):` : "Chưa có chủ trọ nào."}
-                </Text>
-                <IconButton
-                    icon="plus"
-                    iconColor="#fff"
-                    size={28}
-                    onPress={() => navigation.navigate("ThemDV")}
-                    style={{
-                        backgroundColor: "#e91e63",
-                        borderRadius: 28,
-                    }}
-                />
+        <View style={{ flex: 1, padding: 12 }}>
+            <Text style={styles.header}>{getTitle()}</Text>
+
+            <View style={styles.pickerRow}>
+                <View style={styles.pickerContainer}>
+                    <Text>Tháng:</Text>
+                    <Picker
+                        selectedValue={selectedMonth}
+                        onValueChange={(value) => setSelectedMonth(value)}
+                        style={styles.picker}
+                    >
+                        <Picker.Item label="Tất cả" value={0} />
+                        {[...Array(12)].map((_, i) => (
+                            <Picker.Item key={i} label={`Tháng ${i + 1}`} value={i + 1} />
+                        ))}
+                    </Picker>
+                </View>
+
+                <View style={styles.pickerContainer}>
+                    <Text>Năm:</Text>
+                    <Picker
+                        selectedValue={selectedYear}
+                        onValueChange={(value) => setSelectedYear(value)}
+                        style={styles.picker}
+                    >
+                        {yearList.map((year) => (
+                            <Picker.Item key={year} label={`${year}`} value={year} />
+                        ))}
+                    </Picker>
+                </View>
             </View>
 
-            {soLuongDV > 0 && (
-                <FlatList
-                    data={dichVuTheoUser}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={renderItem}
-                    contentContainerStyle={{ paddingBottom: 20 }}
-                />
-            )}
+            <Button
+                mode="outlined"
+                onPress={() => {
+                    setSelectedMonth(0);
+                    setSelectedYear(new Date().getFullYear());
+                }}
+                style={styles.clearButton}
+            >
+                Xóa bộ lọc
+            </Button>
+
+            <FlatList
+                data={filteredLSGD}
+                keyExtractor={(item) => item.id}
+                renderItem={renderItem}
+                contentContainerStyle={{ paddingBottom: 20 }}
+            />
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     header: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
+        fontSize: 18,
+        fontWeight: "bold",
         marginBottom: 10,
     },
-    title: {
-        fontSize: 22,
-        fontWeight: "bold",
+    pickerRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 8,
+    },
+    pickerContainer: {
+        flex: 1,
+        marginHorizontal: 5,
+    },
+    picker: {
+        backgroundColor: "#f5f5f5",
+    },
+    clearButton: {
+        alignSelf: "flex-end",
+        marginBottom: 10,
     },
     card: {
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
         padding: 16,
-        borderRadius: 12,
-        elevation: 3,
+        borderRadius: 10,
         marginBottom: 12,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        elevation: 2,
     },
-    name: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 4,
-    },
-    rowBetween: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-    },
-    price: {
+    title: {
         fontSize: 16,
-        fontWeight: '600',
-        color: '#28a745',
+        fontWeight: "bold",
+        marginBottom: 4,
     },
 });
 

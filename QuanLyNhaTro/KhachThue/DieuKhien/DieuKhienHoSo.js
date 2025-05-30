@@ -8,6 +8,7 @@ import HoSo from "../ManHinh/HoSo";
 import SuaThongTin from "../ManHinh/SuaThongTin";
 import DoiMK from "../ManHinh/DoiMK";
 import TroDK from "../ManHinh/TroDK";
+import TroThue from "../ManHinh/TroThue";
 
 const Stack = createStackNavigator();
 
@@ -116,6 +117,35 @@ const DieuKhienHoSo = () => {
             <Stack.Screen
                 name="TroDK"
                 component={TroDK}
+                options={() => ({
+                    title: "",
+                    headerTitleAlign: "center",
+                    headerStyle: {
+                        backgroundColor: "#FFD166",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 5,
+                        elevation: 8,
+                        borderBottomWidth: 0,
+                    },
+                    headerTitleStyle: {
+                        color: "#F8F9FA",
+                        fontWeight: "bold",
+                        fontSize: 22,
+                        letterSpacing: 1,
+                        fontFamily: "HelveticaNeue-Medium",
+                        textShadowColor: 'rgba(0, 0, 0, 0.3)',
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 2,
+                    },
+
+                })}
+            />
+
+            <Stack.Screen
+                name="TroThue"
+                component={TroThue}
                 options={() => ({
                     title: "",
                     headerTitleAlign: "center",

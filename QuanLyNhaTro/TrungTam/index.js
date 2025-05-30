@@ -28,11 +28,11 @@ const reducer = (state, action) => {
         case "SET_TIENPHONG":
             return { ...state, tienPhong: action.value };
         case "SET_LSTIENPHONG":
-            return { ...state, tienPhong: action.value };
+            return { ...state, lSTienPhong: action.value };
         case "SET_THUEPHONG":
-            return { ...state, chuTro: action.value };
+            return { ...state, thuePhong: action.value };
         case "SET_LSGD":
-            return { ...state, chuTro: action.value };
+            return { ...state, LSGD: action.value };
         case "SET_LOADING":
             return { ...state, loading: action.value };
         case "SET_ERROR":
@@ -738,46 +738,49 @@ const loadTro = async (dispatch, userId) => {
     }
 };
 
-const loadLSGD = async (dispatch, userId) => {
+const loadLSTT = async (dispatch, userId) => {
     dispatch({ type: 'SET_LOADING', value: true });
 
     try {
-        // Lấy tất cả LichSuGiaoDich
-        const snapshot = await firestore().collection("LichSuGiaoDich").get();
-
+        const snapshot = await firestore().collection("LichSuThanhToan").get();
         const lsgdDocs = snapshot.docs;
-
         const filteredLSGD = [];
 
         for (const doc of lsgdDocs) {
             const data = doc.data();
 
-            // Chỉ xét nếu trạng thái là "true"
-            if (data.trangThai === "true" && data.tienPhongId) {
-                const tienPhongDoc = await firestore()
-                    .collection("TienPhong")
-                    .doc(data.tienPhongId)
-                    .get();
+            const gd = await firestore().collection("LichSuGiaoDich").doc(data.giaoDichId).get();
+            const gdData = gd.data();
+            if (!gdData) continue;
 
-                const tienPhongData = tienPhongDoc.data();
+            const tienPhong = await firestore().collection("TienPhong").doc(gdData.tienPhongId).get();
+            const tienPhongData = tienPhong.data();
+            if (!tienPhongData || tienPhongData.nguoiThueId !== userId) continue;
 
-                if (tienPhongData && tienPhongData.nguoiThueId === userId) {
-                    filteredLSGD.push({
-                        id: doc.id,
-                        ...data,
-                        tienPhong: {
-                            id: tienPhongDoc.id,
-                            ...tienPhongData
-                        }
-                    });
-                }
-            }
+            const chuTro = await firestore().collection("ChuTro").doc(tienPhongData.creator).get();
+            const chuTroData = chuTro.data();
+
+            filteredLSGD.push({
+                id: doc.id,
+                ngayThanhToan: data.ngayThanhToan,
+                tongTien: tienPhongData.tongTien,
+                tenPhong: tienPhongData.tenPhong,
+                tenNguoiThue: tienPhongData.tenNguoiThue,
+                tenChuTro: chuTroData?.fullName || "Không rõ",
+                tenTro: chuTroData.tenTro || "Chưa đặt tên",
+            });
+            console.log("userId hiện tại:", userId);
+            console.log("nguoiThueId trong tienPhong:", tienPhongData.nguoiThueId);
+
         }
 
         dispatch({ type: 'SET_LSGD', value: filteredLSGD });
         dispatch({ type: 'SET_LOADING', value: false });
+
+        console.log("DỮ LIỆU LỊCH SỬ", filteredLSGD);
+        return filteredLSGD;
     } catch (error) {
-        console.error("Lỗi khi tải dữ liệu lịch sử giao dịch:", error);
+        console.error("Lỗi khi tải lịch sử:", error);
         dispatch({ type: 'SET_ERROR', value: error.message });
         dispatch({ type: 'SET_LOADING', value: false });
     }
@@ -805,5 +808,5 @@ export {
     loadTTCN,
     loadThuePhong,
     loadTro,
-    loadLSGD,
+    loadLSTT,
 };

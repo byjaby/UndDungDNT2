@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, Alert } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 import { Button } from "react-native-paper";
 import { loadHoSo, useMyContextController } from "../../TrungTam";
 import { useFocusEffect } from '@react-navigation/native';
@@ -10,7 +10,7 @@ const HoSo = ({ navigation }) => {
 
     if (!userLogin) {
         return (
-            <View style={styles.container}>
+            <View style={styles.loadingContainer}>
                 <Text>Đang tải thông tin người dùng...</Text>
             </View>
         );
@@ -23,37 +23,38 @@ const HoSo = ({ navigation }) => {
     );
 
     return (
-        <View style={styles.container}>
-            <View style={styles.row}>
-                <Text style={styles.label}>Họ tên:</Text>
-                <Text style={styles.value}>{userLogin.hoTen || "Chưa có"}</Text>
+        <ScrollView contentContainerStyle={styles.container}>
+            <View style={styles.card}>
+                <View style={styles.row}>
+                    <Text style={styles.label}>Họ tên:</Text>
+                    <Text style={styles.value}>{userLogin.hoTen || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Email:</Text>
+                    <Text style={styles.value}>{userLogin.email || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>SĐT:</Text>
+                    <Text style={styles.value}>{userLogin.sDT || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Địa chỉ:</Text>
+                    <Text style={styles.value}>{userLogin.diaChi || "Chưa có"}</Text>
+                </View>
+
+                <View style={styles.row}>
+                    <Text style={styles.label}>Ngày tạo:</Text>
+                    <Text style={styles.value}>
+                        {userLogin.createdAt
+                            ? new Date(userLogin.createdAt.seconds * 1000).toLocaleDateString()
+                            : "Không rõ"}
+                    </Text>
+                </View>
             </View>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Email:</Text>
-                <Text style={styles.value}>{userLogin.email || "Chưa có"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>SĐT:</Text>
-                <Text style={styles.value}>{userLogin.sDT || "Chưa có"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Địa chỉ:</Text>
-                <Text style={styles.value}>{userLogin.diaChi || "Chưa có"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Ngày tạo:</Text>
-                <Text style={styles.value}>
-                    {userLogin.createdAt
-                        ? new Date(userLogin.createdAt.seconds * 1000).toLocaleDateString()
-                        : "Không rõ"}
-                </Text>
-            </View>
-
-            {/* Các nút chỉnh sửa và đổi mật khẩu */}
             <View style={styles.buttonContainer}>
                 <Button
                     mode="contained"
@@ -73,40 +74,59 @@ const HoSo = ({ navigation }) => {
                     Đổi mật khẩu
                 </Button>
             </View>
-        </View>
+        </ScrollView>
     );
 };
 
 export default HoSo;
 
 const styles = StyleSheet.create({
-    container: {
+    loadingContainer: {
         flex: 1,
-        padding: 20,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    container: {
+        padding: 24,
+        backgroundColor: "#f7f9fc",
+        flexGrow: 1,
+    },
+    card: {
         backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+        elevation: 3,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 3 },
+        marginBottom: 30,
     },
     row: {
         flexDirection: "row",
-        marginBottom: 12,
+        marginBottom: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+        paddingBottom: 8,
     },
     label: {
-        fontWeight: "bold",
-        fontSize: 18,
+        fontWeight: "600",
+        fontSize: 16,
         width: 110,
-        color: "#333",
+        color: "#444",
     },
     value: {
-        fontSize: 18,
         flex: 1,
-        color: "#555",
+        fontSize: 16,
+        color: "#666",
     },
     buttonContainer: {
         flexDirection: "row",
         justifyContent: "space-around",
-        marginTop: 15,
     },
     button: {
-        width: 170,
-        paddingHorizontal: 16,
+        width: 160,
+        borderRadius: 8,
+        elevation: 2,
     },
 });

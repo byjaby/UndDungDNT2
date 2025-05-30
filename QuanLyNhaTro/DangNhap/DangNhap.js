@@ -192,12 +192,6 @@ const DangNhap = ({ navigation }) => {
                     >
                         Đăng nhập
                     </Button>
-
-                    <View style={styles.orContainer}>
-                        <View style={styles.divider} />
-                        <Text style={styles.orText}>Hoặc đăng nhập với</Text>
-                        <View style={styles.divider} />
-                    </View>
                     {/* Phần đăng ký */}
                     <View style={styles.registerContainer}>
                         <Text style={styles.registerText}>Bạn chưa có tài khoản? </Text>

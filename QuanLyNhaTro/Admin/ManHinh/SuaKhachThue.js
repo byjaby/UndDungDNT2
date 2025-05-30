@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { View, StyleSheet, Alert, ScrollView } from "react-native";
-import { TextInput, Button, Text } from "react-native-paper";
+import { View, StyleSheet, Alert, ScrollView, KeyboardAvoidingView, Platform } from "react-native";
+import { TextInput, Button, Text, Appbar } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { useMyContextController } from "../../TrungTam";
@@ -9,12 +9,7 @@ const SuaKhachThue = ({ route }) => {
     const navigation = useNavigation();
     const { user } = route.params;
     const [controller, dispatch] = useMyContextController();
-    const { userLogin } = controller;
-    if (userLogin) {
-        console.log(userLogin.user_id);
-    } else {
-        console.log("Chưa có userLogin");
-    }
+
     const [fullName, setFullName] = useState(user.fullName || "");
     const [email, setEmail] = useState(user.email || "");
     const [phone, setPhone] = useState(user.phone || "");
@@ -37,7 +32,7 @@ const SuaKhachThue = ({ route }) => {
                 fullName,
                 email,
                 phone,
-                address
+                address,
             });
 
             Alert.alert("Thành công", "Đã cập nhật thông tin khách thuê.");
@@ -48,77 +43,97 @@ const SuaKhachThue = ({ route }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.title}>Chỉnh sửa khách thuê</Text>
+        <>
+            <Appbar.Header style={styles.appbar}>
+                <Appbar.BackAction onPress={() => navigation.goBack()} color="#fff" />
+                <Appbar.Content title="Chỉnh sửa khách thuê" titleStyle={styles.appbarTitle} />
+            </Appbar.Header>
 
-            <TextInput
-                label="Họ tên"
-                value={fullName}
-                onChangeText={setFullName}
-                mode="outlined"
-                style={styles.input}
-            />
-
-            <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                keyboardType="email-address"
-                style={styles.input}
-            />
-
-            <TextInput
-                label="Số điện thoại"
-                value={phone}
-                onChangeText={setPhone}
-                mode="outlined"
-                keyboardType="phone-pad"
-                style={styles.input}
-            />
-
-            <TextInput
-                label="Địa chỉ"
-                value={address}
-                onChangeText={setAddress}
-                mode="outlined"
-                multiline
-                style={[styles.input, { height: 80 }]}
-            />
-
-            <Button
-                mode="contained"
-                onPress={handleSave}
-                style={styles.button}
-                icon="content-save"
+            <KeyboardAvoidingView
+                style={{ flex: 1 }}
+                behavior={Platform.OS === "ios" ? "padding" : null}
             >
-                Lưu
-            </Button>
-        </ScrollView>
+                <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+                    <TextInput
+                        label="Họ tên"
+                        value={fullName}
+                        onChangeText={setFullName}
+                        mode="outlined"
+                        style={styles.input}
+                        autoComplete="name"
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Email"
+                        value={email}
+                        onChangeText={setEmail}
+                        mode="outlined"
+                        keyboardType="email-address"
+                        style={styles.input}
+                        autoComplete="email"
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Số điện thoại"
+                        value={phone}
+                        onChangeText={setPhone}
+                        mode="outlined"
+                        keyboardType="phone-pad"
+                        style={styles.input}
+                        returnKeyType="next"
+                    />
+                    <TextInput
+                        label="Địa chỉ"
+                        value={address}
+                        onChangeText={setAddress}
+                        mode="outlined"
+                        multiline
+                        style={[styles.input, { height: 90 }]}
+                        returnKeyType="done"
+                    />
+
+                    <Button
+                        mode="contained"
+                        onPress={handleSave}
+                        style={styles.button}
+                        contentStyle={{ paddingVertical: 10 }}
+                        icon="content-save"
+                    >
+                        Lưu
+                    </Button>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </>
     );
 };
 
-export default SuaKhachThue;
-
 const styles = StyleSheet.create({
-    container: {
-        padding: 20,
-        backgroundColor: "#fff",
+    appbar: {
+        backgroundColor: "#4A90E2",
     },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        alignSelf: "center",
-        color: "#3f51b5",
+    appbarTitle: {
+        color: "#fff",
+        fontWeight: "600",
+        fontSize: 20,
+    },
+    container: {
+        padding: 24,
+        backgroundColor: "#f9fafd",
+        flexGrow: 1,
     },
     input: {
-        marginBottom: 16,
+        marginBottom: 18,
+        backgroundColor: "#fff",
+        borderRadius: 6,
     },
     button: {
-        alignSelf: 'center',
-        width: 100,
-        marginTop: 20,
-        backgroundColor: "#66E879",
+        backgroundColor: "#4A90E2",
+        borderRadius: 8,
+        alignSelf: "center",
+        width: "50%",
+        elevation: 3,
+        marginTop: 12,
     },
 });
+
+export default SuaKhachThue;

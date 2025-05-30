@@ -7,6 +7,7 @@ import {
     Text,
     Dimensions,
     Image,
+    Alert,
 } from "react-native";
 import firestore from "@react-native-firebase/firestore";
 import { useFocusEffect } from "@react-navigation/native";
@@ -24,6 +25,7 @@ const Tro = ({ navigation }) => {
     const [phong, setPhong] = useState([]);
     const [tienPhongList, setTienPhongList] = useState([]);
     const [lichSuGiaoDichList, setLichSuGiaoDichList] = useState([]);
+    const [refresh, setRefresh] = useState(false);
 
     const fetchTienPhong = async () => {
         try {
@@ -59,12 +61,11 @@ const Tro = ({ navigation }) => {
             console.error("Lỗi khi load LichSuGiaoDich:", error);
         }
     };
-
     useFocusEffect(
         React.useCallback(() => {
             const fetchTro = async () => {
                 if (!userLogin?.user_id) return;
-
+                await fetchPhongByNguoiThue();
                 try {
                     const result = await loadTro(dispatch, userLogin.user_id);
                     setRooms(result || []);
@@ -97,6 +98,7 @@ const Tro = ({ navigation }) => {
                         const phongDoc = await firestore()
                             .collection("Phong")
                             .doc(phongId)
+                            .where("nguoiThue", "==", userLogin.user_id)
                             .get();
 
                         if (phongDoc.exists) {
@@ -112,8 +114,68 @@ const Tro = ({ navigation }) => {
             fetchTro();
             fetchTienPhong();
             fetchLichSuGiaoDich();
-        }, [userLogin?.user_id])
+        }, [userLogin?.user_id], refresh)
     );
+
+    const confirmTraPhong = (tienPhongData) => {
+        Alert.alert(
+            "Xác nhận trả phòng",
+            "Bạn có muốn trả phòng không?",
+            [
+                {
+                    text: "Không",
+                    style: "cancel"
+                },
+                {
+                    text: "Có",
+                    onPress: () => traPhong({ tienPhongData }) // Gọi hàm thực hiện trả phòng
+                }
+            ]
+        );
+    };
+
+    const traPhong = async ({ tienPhongData }) => {
+        try {
+            const docSnap = await firestore()
+                .collection("Phong")
+                .doc(tienPhongData.phongId)
+                .get();
+
+            if (!docSnap.exists) {
+                Alert.alert("Không tìm thấy phòng đang sử dụng", "Kiểm tra lại thông tin.");
+                return;
+            }
+
+            const data = docSnap.data();
+
+            if (data.nguoiThue !== userLogin.user_id || data.trangThai !== true) {
+                Alert.alert("Không hợp lệ", "Phòng này không thuộc người dùng hoặc đã trả.");
+                return;
+            }
+
+            await docSnap.ref.update({
+                nguoiThue: "",
+                ngayTraPhong: new Date(),
+            });
+
+            await firestore().collection("LichSuThuePhong").add({
+                creator: data.creator,
+                nguoiThue: userLogin.user_id,
+                ngayThue: data.ngayThue,
+                ngayTraPhong: new Date(),
+                phongId: data.id,
+                tenPhong: data.tenPhong || "",
+                trangThai: "Đã hủy"
+            });
+
+            Alert.alert("Trả phòng thành công", "Thông tin đã được cập nhật.");
+
+            setRefresh(prev => !prev);
+        } catch (error) {
+            console.error("Lỗi khi trả phòng:", error);
+            Alert.alert("Lỗi", "Không thể trả phòng. Vui lòng thử lại.");
+        }
+    };
 
     const renderRoomCard = ({ item }) => {
         const daThanhToan = (tienPhongId) => {
@@ -176,6 +238,12 @@ const Tro = ({ navigation }) => {
                                 <Text style={styles.payButtonText}>Thanh toán</Text>
                             </TouchableOpacity>
                         )}
+                        <TouchableOpacity
+                            style={[styles.payButton, { backgroundColor: "#FF3B30", marginTop: 8 }]}
+                            onPress={() => confirmTraPhong(tienPhong)}
+                        >
+                            <Text style={styles.payButtonText}>Trả phòng</Text>
+                        </TouchableOpacity>
                     </View>
                 ) : (
                     <View style={styles.billContainer}>
@@ -189,6 +257,7 @@ const Tro = ({ navigation }) => {
     };
 
     return (
+
         <View style={styles.container}>
             <Text style={styles.title}>Thông tin chi tiết phòng trọ</Text>
 

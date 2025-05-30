@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, StyleSheet, Alert, ScrollView } from "react-native";
-import { TextInput, Button, Text } from "react-native-paper";
+import { TextInput, Button, Appbar } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
 import { useMyContextController } from "../../TrungTam";
@@ -10,11 +10,13 @@ const SuaThongTinAdmin = ({ route }) => {
     const { user } = route.params;
     const [controller, dispatch] = useMyContextController();
     const { userLogin } = controller;
+
     if (userLogin) {
         console.log(userLogin.user_id);
     } else {
         console.log("Chưa có userLogin");
     }
+
     const [hoTen, setFullName] = useState(user.hoTen || "");
     const [email, setEmail] = useState(user.email || "");
     const [sDT, setPhone] = useState(user.sDT || "");
@@ -57,51 +59,58 @@ const SuaThongTinAdmin = ({ route }) => {
     };
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
-            <TextInput
-                label="Họ tên"
-                value={hoTen}
-                onChangeText={setFullName}
-                mode="outlined"
-                style={styles.input}
-            />
+        <>
+            <Appbar.Header style={{ backgroundColor: "#F2E9E4" }}>
+                <Appbar.BackAction onPress={() => navigation.goBack()} />
+                <Appbar.Content title="Chỉnh sửa thông tin" />
+            </Appbar.Header>
 
-            <TextInput
-                label="Email"
-                value={email}
-                onChangeText={setEmail}
-                mode="outlined"
-                keyboardType="email-address"
-                style={styles.input}
-            />
+            <ScrollView contentContainerStyle={styles.container}>
+                <TextInput
+                    label="Họ tên"
+                    value={hoTen}
+                    onChangeText={setFullName}
+                    mode="outlined"
+                    style={styles.input}
+                />
 
-            <TextInput
-                label="Số điện thoại"
-                value={sDT}
-                onChangeText={setPhone}
-                mode="outlined"
-                keyboardType="phone-pad"
-                style={styles.input}
-            />
+                <TextInput
+                    label="Email"
+                    value={email}
+                    onChangeText={setEmail}
+                    mode="outlined"
+                    keyboardType="email-address"
+                    style={styles.input}
+                />
 
-            <TextInput
-                label="Địa chỉ"
-                value={diaChi}
-                onChangeText={setAddress}
-                mode="outlined"
-                multiline
-                style={[styles.input, { height: 80 }]}
-            />
+                <TextInput
+                    label="Số điện thoại"
+                    value={sDT}
+                    onChangeText={setPhone}
+                    mode="outlined"
+                    keyboardType="phone-pad"
+                    style={styles.input}
+                />
 
-            <Button
-                mode="contained"
-                onPress={handleSave}
-                style={styles.button}
-                icon="content-save"
-            >
-                Lưu
-            </Button>
-        </ScrollView>
+                <TextInput
+                    label="Địa chỉ"
+                    value={diaChi}
+                    onChangeText={setAddress}
+                    mode="outlined"
+                    multiline
+                    style={[styles.input, { height: 80 }]}
+                />
+
+                <Button
+                    mode="contained"
+                    onPress={handleSave}
+                    style={styles.button}
+                    icon="content-save"
+                >
+                    Lưu
+                </Button>
+            </ScrollView>
+        </>
     );
 };
 
@@ -110,21 +119,15 @@ export default SuaThongTinAdmin;
 const styles = StyleSheet.create({
     container: {
         padding: 20,
-        backgroundColor: "#fff",
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 20,
-        alignSelf: "center",
-        color: "#3f51b5",
+        backgroundColor: "#F2E9E4",
+        flexGrow: 1,
     },
     input: {
         marginBottom: 16,
     },
     button: {
         alignSelf: 'center',
-        width: 100,
+        width: 120,
         marginTop: 20,
         backgroundColor: "#66E879",
     },
