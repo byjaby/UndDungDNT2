@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, Alert, Image } from "react-native";
-import { Button } from "react-native-paper";
+import { View, StyleSheet, Alert, Image, ScrollView } from "react-native";
+import { Button, Text, useTheme, Card, IconButton, Divider } from "react-native-paper";
 import firestore from "@react-native-firebase/firestore";
 import { useNavigation } from '@react-navigation/native';
 import { useMyContextController } from "../../TrungTam";
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const ChiTietPhong = ({ route }) => {
+    const theme = useTheme();
     const [controller, dispatch] = useMyContextController();
     const navigation = useNavigation();
     const { phong } = route.params;
 
     const [tenNguoiThue, setTenNguoiThue] = useState("");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchNguoiThue = async () => {
@@ -35,16 +38,27 @@ const ChiTietPhong = ({ route }) => {
 
     const handleDelete = () => {
         if (phong.nguoiThue && phong.nguoiThue.trim() !== "") {
-            Alert.alert("Không thể xóa", "Phòng hiện đang có người thuê, không thể xóa.");
+            Alert.alert(
+                "Không thể xóa",
+                "Phòng hiện đang có người thuê, không thể xóa.",
+                [{ text: "Đã hiểu" }]
+            );
             return;
         }
+
         Alert.alert(
             "Xác nhận xóa",
-            "Bạn có chắc chắn muốn xóa phòng cho thuê này?",
+            "Bạn có chắc chắn muốn xóa phòng này?",
             [
-                { text: "Hủy", style: "cancel" },
                 {
-                    text: "Xóa", style: "destructive", onPress: async () => {
+                    text: "Hủy",
+                    style: "cancel"
+                },
+                {
+                    text: "Xóa",
+                    style: "destructive",
+                    onPress: async () => {
+                        setLoading(true);
                         try {
                             await firestore().collection("Phong").doc(phong.id).delete();
 
@@ -55,11 +69,15 @@ const ChiTietPhong = ({ route }) => {
                                     sLPhong: firestore.FieldValue.increment(-1),
                                 });
 
-                            Alert.alert("Thành công", "Phòng cho thuê đã được xóa.");
-                            navigation.goBack();
+                            Alert.alert(
+                                "Thành công",
+                                "Phòng đã được xóa thành công.",
+                                [{ text: "OK", onPress: () => navigation.goBack() }]
+                            );
                         } catch (error) {
-                            console.log("Lỗi khi xóa phòng cho thuê:", error.message);
+                            console.log("Lỗi khi xóa phòng:", error.message);
                             Alert.alert("Lỗi", "Không thể xóa: " + error.message);
+                            setLoading(false);
                         }
                     }
                 }
@@ -67,110 +85,160 @@ const ChiTietPhong = ({ route }) => {
         );
     };
 
-    return (
-        <View style={styles.container}>
-            <Image
-                source={{ uri: phong.hinhAnh }}
-                style={styles.image}
-                resizeMode="cover"
+    const renderDetailRow = (icon, label, value) => (
+        <View style={styles.detailRow}>
+            <MaterialCommunityIcons
+                name={icon}
+                size={24}
+                color={theme.colors.primary}
+                style={styles.rowIcon}
             />
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Tên phòng:</Text>
-                <Text style={styles.value}>{phong.tenPhong || "Không rõ"}</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Chiều dài:</Text>
-                <Text style={styles.value}>{phong.chieuDai} m</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Chiều rộng:</Text>
-                <Text style={styles.value}>{phong.chieuRong} m</Text>
-            </View>
-
-            <View style={styles.row}>
-                <Text style={styles.label}>Giá phòng:</Text>
-                <Text style={styles.value}>
-                    {phong.giaPhong != null ? `${phong.giaPhong.toLocaleString()} đ` : "Không rõ"}
+            <View style={styles.detailTextContainer}>
+                <Text variant="bodyMedium" style={[styles.detailLabel, { color: theme.colors.onSurfaceVariant }]}>
+                    {label}
+                </Text>
+                <Text variant="bodyLarge" style={[styles.detailValue, { color: theme.colors.onSurface }]}>
+                    {value || "Không có thông tin"}
                 </Text>
             </View>
+        </View>
+    );
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Người thuê:</Text>
-                <Text style={styles.value}>
-                    {phong.nguoiThue ? tenNguoiThue : "Chưa có"}
-                </Text>
-            </View>
+    return (
+        <ScrollView
+            style={[styles.container, { backgroundColor: theme.colors.background }]}
+            contentContainerStyle={styles.scrollContent}
+        >
+            <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
+                <Image
+                    source={{ uri: phong.hinhAnh || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80' }}
+                    style={styles.image}
+                    resizeMode="cover"
+                />
+                <Card.Content>
+                    <Text variant="titleLarge" style={[styles.title, { color: theme.colors.onSurface }]}>
+                        {phong.tenPhong || "Phòng không tên"}
+                    </Text>
 
-            <View style={styles.row}>
-                <Text style={styles.label}>Ngày tạo:</Text>
-                <Text style={styles.value}>
-                    {phong.createdAt
-                        ? new Date(phong.createdAt.seconds * 1000).toLocaleDateString()
-                        : "Không rõ"}
-                </Text>
-            </View>
+                    <Divider style={[styles.divider, { backgroundColor: theme.colors.outline }]} />
+
+                    {renderDetailRow(
+                        "tape-measure",
+                        "Diện tích",
+                        `${phong.chieuDai || 0}m x ${phong.chieuRong || 0}m`
+                    )}
+
+                    {renderDetailRow(
+                        "cash",
+                        "Giá phòng",
+                        phong.giaPhong != null ? `${phong.giaPhong.toLocaleString()} đ` : null
+                    )}
+
+                    {renderDetailRow(
+                        phong.nguoiThue ? "account-check" : "home",
+                        "Tình trạng",
+                        phong.nguoiThue ? `Đang thuê: ${tenNguoiThue}` : "Phòng trống"
+                    )}
+
+                    {renderDetailRow(
+                        "calendar-month",
+                        "Ngày tạo",
+                        phong.createdAt ? new Date(phong.createdAt.seconds * 1000).toLocaleDateString() : null
+                    )}
+                </Card.Content>
+            </Card>
 
             <View style={styles.buttonContainer}>
                 <Button
                     mode="contained"
                     icon="pencil"
                     onPress={() => navigation.navigate("SuaPhong", { phong })}
-                    style={[styles.button, { backgroundColor: "#66E879" }]}
+                    style={[styles.button, { backgroundColor: theme.colors.primary }]}
+                    labelStyle={styles.buttonLabel}
+                    contentStyle={styles.buttonContent}
                 >
                     Chỉnh sửa
                 </Button>
 
                 <Button
-                    mode="contained"
+                    mode="contained-tonal"
                     icon="delete"
                     onPress={handleDelete}
-                    style={[styles.button, { backgroundColor: "#f44336" }]}
+                    style={styles.button}
+                    labelStyle={styles.buttonLabel}
+                    contentStyle={styles.buttonContent}
+                    loading={loading}
+                    disabled={loading}
                 >
-                    Xóa
+                    Xóa phòng
                 </Button>
             </View>
-        </View>
+        </ScrollView>
     );
 };
-
-export default ChiTietPhong;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
-        backgroundColor: "#fff",
     },
-    row: {
-        flexDirection: "row",
-        marginBottom: 12,
+    scrollContent: {
+        paddingLeft: 16,
+        paddingRight: 16,
+        paddingBottom: 16,
     },
-    label: {
-        fontWeight: "bold",
-        fontSize: 18,
-        width: 110,
-        color: "#333",
-    },
-    value: {
-        fontSize: 18,
-        flex: 1,
-        color: "#555",
+    card: {
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 16,
     },
     image: {
-        width: "100%",
-        height: 180,
-        borderRadius: 10,
-        marginBottom: 20,
+        width: '100%',
+        height: 220,
+    },
+    title: {
+        marginTop: 12,
+        marginBottom: 8,
+        fontWeight: 'bold',
+        textAlign: 'center',
+    },
+    divider: {
+        marginVertical: 12,
+        height: 1,
+    },
+    detailRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 10,
+    },
+    rowIcon: {
+        marginRight: 16,
+    },
+    detailTextContainer: {
+        flex: 1,
+    },
+    detailLabel: {
+        fontSize: 14,
+        opacity: 0.8,
+    },
+    detailValue: {
+        fontSize: 16,
+        marginTop: 2,
     },
     buttonContainer: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        marginTop: 20,
+        marginTop: 8,
     },
     button: {
-        paddingHorizontal: 16,
+        width: 140,
+        alignSelf: "center",
+        marginVertical: 8,
+        borderRadius: 8,
+    },
+    buttonLabel: {
+        fontSize: 16,
+    },
+    buttonContent: {
+        height: 48,
     },
 });
+
+export default ChiTietPhong;
