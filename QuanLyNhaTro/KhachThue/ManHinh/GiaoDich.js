@@ -3,7 +3,7 @@ import { View, FlatList, StyleSheet } from "react-native";
 import { Text, Button } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import { useMyContextController, loadLSTT } from "../../TrungTam";
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from "@react-navigation/native";
 
 const GiaoDich = () => {
     const [controller, dispatch] = useMyContextController();
@@ -18,20 +18,25 @@ const GiaoDich = () => {
         }, [])
     );
 
-    const filteredLSGD = LSGD.filter((item) => {
-        const date = item.ngayThanhToan instanceof Date
-            ? item.ngayThanhToan
-            : item.ngayThanhToan?.toDate?.();
+    const filteredLSGD =
+        LSGD.length > 0
+            ? LSGD.filter((item) => {
+                const date =
+                    item.ngayThanhToan instanceof Date
+                        ? item.ngayThanhToan
+                        : item.ngayThanhToan?.toDate?.();
 
-        return (
-            date &&
-            (selectedMonth === 0 || date.getMonth() + 1 === selectedMonth) &&
-            date.getFullYear() === selectedYear
-        );
-    });
+                return (
+                    date &&
+                    (selectedMonth === 0 || date.getMonth() + 1 === selectedMonth) &&
+                    date.getFullYear() === selectedYear
+                );
+            })
+            : [];
 
     const renderItem = ({ item }) => {
-        const formattedDate = item.ngayThanhToan?.toDate().toLocaleDateString("vi-VN") || "Không rõ";
+        const formattedDate =
+            item.ngayThanhToan?.toDate().toLocaleDateString("vi-VN") || "Không rõ";
         return (
             <View style={styles.card}>
                 <Text style={styles.title}>Tên trọ: {item.tenTro}</Text>
@@ -99,12 +104,20 @@ const GiaoDich = () => {
                 Xóa bộ lọc
             </Button>
 
-            <FlatList
-                data={filteredLSGD}
-                keyExtractor={(item) => item.id}
-                renderItem={renderItem}
-                contentContainerStyle={{ paddingBottom: 20 }}
-            />
+            {filteredLSGD.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                    <Text style={styles.emptyText}>
+                        Bạn chưa có giao dịch nào.
+                    </Text>
+                </View>
+            ) : (
+                <FlatList
+                    data={filteredLSGD}
+                    keyExtractor={(item) => item.id}
+                    renderItem={renderItem}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                />
+            )}
         </View>
     );
 };
@@ -142,6 +155,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "bold",
         marginBottom: 4,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 30,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: "#666",
     },
 });
 

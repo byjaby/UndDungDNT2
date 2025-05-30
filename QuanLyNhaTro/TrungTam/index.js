@@ -405,32 +405,56 @@ const themKhachThue = async (dispatch, fullName, email, password, phone, address
     dispatch({ type: "SET_LOADING", value: true });
 
     try {
-        // Kiểm tra phone đã tồn tại chưa
-        const phoneQuery = await firestore().collection("KhachThue").where("phone", "==", phone.trim()).get();
-        if (!phoneQuery.empty) {
-            throw new Error("Số điện thoại đã được sử dụng.");
+        const trimmedEmail = email.trim();
+        const trimmedPhone = phone.trim();
+
+        // Kiểm tra email đã tồn tại trong Firestore chưa
+        const emailQuery = await firestore()
+            .collection("KhachThue")
+            .where("email", "==", trimmedEmail)
+            .get();
+        if (!emailQuery.empty) {
+            Alert.alert("Lỗi", "Email đã được sử dụng.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Email đã được sử dụng." };
         }
 
-        const response = await auth().createUserWithEmailAndPassword(email.trim(), password);
+        // Kiểm tra phone đã tồn tại chưa
+        const phoneQuery = await firestore()
+            .collection("KhachThue")
+            .where("phone", "==", trimmedPhone)
+            .get();
+        if (!phoneQuery.empty) {
+            Alert.alert("Lỗi", "Số điện thoại đã được sử dụng.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Số điện thoại đã được sử dụng." };
+        }
+
+        const response = await auth().createUserWithEmailAndPassword(trimmedEmail, password);
         const uid = response.user.uid;
 
-        const loaiQuery = await firestore().collection("LoaiNguoiDung").where("tenLoai", "==", "Khách thuê").get();
+        const loaiQuery = await firestore()
+            .collection("LoaiNguoiDung")
+            .where("tenLoai", "==", "Khách thuê")
+            .get();
         if (loaiQuery.empty) {
-            throw new Error("Không tìm thấy loại người dùng 'Chủ trọ'.");
+            Alert.alert("Lỗi", "Không tìm thấy loại người dùng 'Khách thuê'.");
+            dispatch({ type: "SET_LOADING", value: false });
+            return { success: false, message: "Không tìm thấy loại người dùng 'Khách thuê'." };
         }
+
         const idLoaiKhachThue = loaiQuery.docs[0].id;
 
         await firestore().collection("KhachThue").doc(uid).set({
             fullName,
-            email: email.trim(),
-            phone: phone.trim(),
+            email: trimmedEmail,
+            phone: trimmedPhone,
             address,
             id_loaiNguoiDung: idLoaiKhachThue,
             createdAt: firestore.FieldValue.serverTimestamp(),
         });
 
         dispatch({ type: "SET_LOADING", value: false });
-
         return { success: true, idKhachThue: uid };
 
     } catch (error) {
@@ -445,6 +469,7 @@ const themKhachThue = async (dispatch, fullName, email, password, phone, address
             message = error.message;
         }
 
+        Alert.alert("Lỗi", message);
         dispatch({ type: "SET_ERROR", value: message });
         dispatch({ type: "SET_LOADING", value: false });
         return { success: false, message };
