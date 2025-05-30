@@ -57,19 +57,6 @@ cd your-project</pre>
   </div>
 
   <div class="section">
-    <h2>📂 Cấu Trúc Dự Án</h2>
-    <pre>
-src/
-├── components/
-├── screens/
-├── navigation/
-├── services/       # Firebase configs
-├── store/          # Redux
-└── utils/
-    </pre>
-  </div>
-
-  <div class="section">
     <h2>🧪 Chạy Ứng Dụng</h2>
     <h3>Android</h3>
     <pre>npx react-native run-android</pre>
