@@ -1,69 +1,4 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <title>Hướng Dẫn Cài Đặt App React Native</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
-
-    h1, h2, h3 {
-      color: #2c3e50;
-    }
-
-    code, pre {
-      background-color: #eef1f5;
-      padding: 10px;
-      display: block;
-      white-space: pre-wrap;
-      border-left: 4px solid #3498db;
-      margin: 10px 0;
-    }
-
-    .section {
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    }
-
-    .note {
-      background-color: #fff8e1;
-      border-left: 4px solid #f1c40f;
-      padding: 10px 15px;
-      margin-top: 10px;
-      font-size: 14px;
-    }
-
-    ul {
-  padding-left: 20px;
-  list-style-type: disc;
-}
-
-code {
-  background-color: #f3f3f3;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: monospace;
-}
-
-    .footer {
-      text-align: center;
-      font-size: 13px;
-      margin-top: 40px;
-      color: #888;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="section">
+<div class="section">
     <h1>📱 Ứng Dụng Quản Lý Phòng Trọ - React Native</h1>
     <p>Ứng dụng di động xây dựng bằng <strong>React Native</strong> và <strong>Firebase</strong> để hỗ trợ quản lý phòng, người thuê, hóa đơn và thanh toán.</p>
   </div>
@@ -158,5 +93,3 @@ src/
     © 2025 - React Native Room Management App by Your Name
   </div>
 
-</body>
-</html>
